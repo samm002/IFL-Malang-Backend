@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +26,12 @@ Route::prefix('v1')->group(function () {
   Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [AuthController::class, 'register'])->name('register');
     Route::post('login', [AuthController::class, 'login'])->name('login');
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
   });
-  Route::get('profile', [AuthController::class, 'me'])->name('me')->middleware('auth');
+  Route::get('profile', [UserController::class, 'index'])->name('profile')->middleware('jwt.verify');
+  Route::get('email/verify/{id}', [AuthController::class, 'verify'])->name('verification.verify');
+  Route::get('email/verify', [AuthController::class, 'notice'])->name('verification.notice');
+  Route::get('email/resend', [AuthController::class, 'resend'])->name('verification.resend');
+  Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+  Route::post('password/reset', [PasswordResetController::class, 'reset'])->name('password.reset');
 });
