@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('username')->unique()->nullable();
             $table->string('phone_number')->nullable();
             $table->string('profile_picture')->default('default.png');
+            $table->string('about_me')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
