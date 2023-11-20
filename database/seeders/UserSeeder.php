@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
    */
   public function run()
   {
-    $users = User::factory(10)->create();
+    $users = User::factory(2)->create();
     $role = Role::where('name', 'user')->first();
 
     foreach ($users as $user) {

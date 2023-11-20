@@ -7,8 +7,13 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\URL;
 
-class JwtMiddleware extends BaseMiddleware
+class JwtMiddleware
 {
   /**
    * Handle an incoming request.
@@ -22,9 +27,9 @@ class JwtMiddleware extends BaseMiddleware
     try {
       $user = JWTAuth::parseToken()->authenticate();
     } catch (Exception $e) {
-      if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+      if ($e instanceof TokenInvalidException) {
         return response()->json(['status' => 'Token is Invalid']);
-      } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+      } else if ($e instanceof TokenExpiredException) {
         return response()->json(['status' => 'Token is Expired']);
       } else {
         return response()->json(['status' => 'Authorization Token not found']);

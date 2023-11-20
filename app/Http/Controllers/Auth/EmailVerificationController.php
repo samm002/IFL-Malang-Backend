@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 use App\Models\User;
 
 class EmailVerificationController extends Controller
@@ -54,13 +55,13 @@ class EmailVerificationController extends Controller
 
     if ($validator->fails()) {
       return response()->json([
-          'status' => 'error',
-          'message' => 'Validation error',
-          'error' => $validator->errors(),
+        'status' => 'error',
+        'message' => 'Validation error',
+        'error' => $validator->errors(),
       ], 400);
-  }
+    }
 
-  $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->first();
 
     if ($user->hasVerifiedEmail()) {
       return response()->json([
@@ -77,11 +78,18 @@ class EmailVerificationController extends Controller
     ], 200);
   }
 
-  public function notice()
+  public function notice(Request $request)
   {
-    return response()->json([
-      'status' => 'error',
-      'message' => 'Cannot perform request, your email have not been verified'
-    ]);
+    if (!$request->bearerToken()) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Authorization Token not found'
+      ], 401);
+    } else {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Cannot perform request, your email has not been verified'
+      ], 401);
+    }
   }
 }

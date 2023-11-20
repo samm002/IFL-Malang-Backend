@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
   });
 
   Route::middleware('verified')->group(function () {
-    Route::get('profile', [ProfileController::class, 'showProfile'])->name('profile.show')->middleware('jwt.verify');
-    Route::put('profile', [ProfileController::class, 'updateProfile'])->name('profile.update')->middleware('jwt.verify');
+    Route::get('profile', [ProfileController::class, 'showProfile'])->name('profile.show');
+    Route::put('profile/edit', [ProfileController::class, 'updateProfile'])->name('profile.update');
   });
 });
