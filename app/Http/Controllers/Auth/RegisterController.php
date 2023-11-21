@@ -31,7 +31,9 @@ class RegisterController extends Controller
         'password' => Hash::make($request->input("password")),
       ]);
 
-      $user->roles()->attach(Role::where('name', 'user')->first());
+      $role = Role::where('name', 'user')->first();
+
+      $user->roles()->attach($role);
 
       $user->sendEmailVerificationNotification();
 

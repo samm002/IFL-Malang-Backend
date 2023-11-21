@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\Role_UserController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
@@ -7,7 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,13 +48,23 @@ Route::prefix('v1')->group(function () {
     Route::middleware('verified')->group(function () {
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
-
+    
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.reset');
+    Route::get('role', [AdminController::class, 'notAdmin'])->name('account.notAdmin');
   });
 
   Route::middleware('verified')->group(function () {
     Route::get('profile', [ProfileController::class, 'showProfile'])->name('profile.show');
     Route::put('profile/edit', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    
+    Route::middleware('role:admin')->group(function() {
+      Route::apiResource('role', RoleController::class);
+    });
+
+    Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function() {
+      Route::apiResource('role_user', Role_UserController::class);
+      Route::put('role_user/user_id/{user}', [Role_UserController::class, 'updateByUserId']);
+    });
   });
 });
