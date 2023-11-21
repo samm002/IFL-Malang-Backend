@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\RoleController;
@@ -59,12 +60,10 @@ Route::prefix('v1')->group(function () {
   Route::middleware(['jwt.verify', 'verified'])->group(function () {
     Route::get('profile', [ProfileController::class, 'showProfile'])->name('profile.show');
     Route::put('profile/edit', [ProfileController::class, 'updateProfile'])->name('profile.update');
-
-    Route::middleware('role:admin')->group(function () {
-      Route::apiResource('role', RoleController::class);
-    });
-
+    
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
+      Route::get('/', [AdminController::class, 'index']);
+      Route::apiResource('role', RoleController::class);
       Route::apiResource('role_user', Role_UserController::class);
       Route::put('role_user/user_id/{user}', [Role_UserController::class, 'updateByUserId']);
     });

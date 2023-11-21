@@ -27,9 +27,10 @@ class LoginController extends Controller
       return response()->json(['error' => $validator->messages()], 200);
     }
 
+    $user = User::where('email', $credentials['email'])->first();
+
     try {
       if (!$token = JWTAuth::attempt($credentials)) {
-        $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
           throw ValidationException::withMessages([
@@ -53,6 +54,17 @@ class LoginController extends Controller
       $userId = auth()->user()->id;
 
       $data['token'] = $this->respondWithToken($userId, $token);
+
+      if ($user->hasRole(User::ROLE_ADMIN)) {
+        // Sementara response json
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Admin Login success',
+          'data' => $data,
+        ], 200);
+
+        // kalau udah ada view dashboard, direct ke admin dashboard
+      }
 
       return response()->json([
         'status' => 'success',
@@ -95,7 +107,7 @@ class LoginController extends Controller
     try {
       $expiration = JWTAuth::getPayload()->get('exp');
       $remainingTime = $expiration - time();
-      
+
       if ($expiration < time()) {
         $token = JWTAuth::refresh(JWTAuth::getToken());
 
