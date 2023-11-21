@@ -22,7 +22,7 @@ class NoticeController extends Controller
     }
   }
 
-  public function userNotAdmin(Request $request)
+  public function userNotAdminNotice(Request $request)
   {
     if (!$request->bearerToken()) {
       return response()->json([

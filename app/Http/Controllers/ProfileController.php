@@ -19,7 +19,7 @@ class ProfileController extends Controller
 
     return response()->json([
       'status' => 'success',
-      'message' => 'Get profile',
+      'message' => 'Get profile success',
       'data' => $user,
     ], 200);
   }
@@ -46,14 +46,15 @@ class ProfileController extends Controller
       $posterImage = $user->id . "_profile_" . time() . '.' . $request->profile_picture->extension();
       $request->profile_picture->move($path, $posterImage);
 
-      $user->profile_picture = $posterImage;
+      // $user->profile_picture = $posterImage;
     }
 
     $user->update([
-      'username' => $request->input('username'),
-      'address' => $request->input('address'),
-      'phone_number' => $request->input('phone_number'),
-      'about_me' => $request->input('about_me'),
+      'username' => $request->input('username') ?? $user->username,
+      'address' => $request->input('address') ?? $user->address,
+      'phone_number' => $request->input('phone_number') ?? $user->phone_number,
+      'about_me' => $request->input('about_me') ?? $user->about_me,
+      'profile_picture' => $posterImage ?? $user->profile_picture,
     ]);
 
     /* Kalau view udah ada, bisa pake :
