@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -85,6 +86,69 @@ class LoginController extends Controller
         'message' => 'Log out failed',
         'error_type' => $errorType,
         'error_detail' => $e->getMessage(),
+      ], 500);
+    }
+  }
+
+  public function refreshToken()
+  {
+    try {
+      $expiration = JWTAuth::getPayload()->get('exp');
+      $remainingTime = $expiration - time();
+      
+      // Check if the access token is about to expire or has expired
+      if ($expiration < time()) {
+        // Attempt to refresh the access token
+        $token = JWTAuth::refresh(JWTAuth::getToken());
+
+        // Update the client with the new access token
+        // For example, you can include the new token in the response
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Token refreshed successfully',
+          'token' => $token,
+        ]);
+      }
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Token is still valid',
+        'ttl' => $remainingTime,
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Token refresh failed',
+        'error_detail' => $e->getMessage(),
+      ], 500);
+    }
+  }
+
+  public function checkTokenDuration()
+  {
+    try {
+      // Get the expiration time from the payload
+      $expiration = JWTAuth::getPayload()->get('exp');
+
+      // Calculate the remaining time until the token expires
+      $remainingTime = $expiration - time();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Token TTL retrieved successfully',
+        'ttl' => $remainingTime,
+      ], 200);
+    } catch (TokenExpiredException $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Token has already expired',
+        'error' => $e->getMessage(),
+      ], 401);
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Error retrieving token TTL',
+        'error' => $e->getMessage(),
       ], 500);
     }
   }

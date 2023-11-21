@@ -11,7 +11,7 @@ use App\Models\User;
 
 class EmailVerificationController extends Controller
 {
-  public function verify($id, $hash, Request $request)
+  public function verify($id, Request $request)
   {
     $user = User::find($id);
 
@@ -76,20 +76,5 @@ class EmailVerificationController extends Controller
       'status' => 'success',
       'message' => 'Verification link has been sent to your email'
     ], 200);
-  }
-
-  public function notice(Request $request)
-  {
-    if (!$request->bearerToken()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Authorization Token not found'
-      ], 401);
-    } else {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Cannot perform request, your email has not been verified'
-      ], 401);
-    }
   }
 }

@@ -35,9 +35,12 @@ class RegisterController extends Controller
 
       $user->roles()->attach($role);
 
+      $hasRole = $user->roles()->pluck('name')->first();
+
       $user->sendEmailVerificationNotification();
 
       $data["user"] = $user;
+      $data["user"]["role"] = $hasRole;
 
       return response()->json([
         'status' => 'success',
