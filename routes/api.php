@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,5 +68,12 @@ Route::prefix('v1')->group(function () {
       Route::apiResource('role_user', Role_UserController::class);
       Route::put('role_user/user_id/{user}', [Role_UserController::class, 'updateByUserId']);
     });
+  });
+
+  Route::prefix('user')->group(function() {
+    Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
+    Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+    Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
+    Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
   });
 });
