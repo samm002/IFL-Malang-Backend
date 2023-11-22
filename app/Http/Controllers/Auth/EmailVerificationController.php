@@ -43,7 +43,7 @@ class EmailVerificationController extends Controller
     // daripada direct mending return response biar jelas
     return response()->json([
       'status' => 'success',
-      'message' => 'Email verified successfully, directing to home/login'
+      'message' => 'Email verified successfully, directing to login page'
     ], 200);
   }
 

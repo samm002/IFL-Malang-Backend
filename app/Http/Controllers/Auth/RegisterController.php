@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Role;
+use App\Events\UserRegisteredEvent;
+
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 
 class RegisterController extends Controller
 {
@@ -37,9 +41,14 @@ class RegisterController extends Controller
 
       $hasRole = $user->roles()->pluck('name')->first();
 
+      // event(new UserRegisteredEvent($user));
       $user->sendEmailVerificationNotification();
 
+      // $durasi = Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60));
+
       $data["user"] = $user;
+      // $data["hash"] = sha1($user->email);
+      // $data["expired"] = $durasi;
       $data["user"]["role"] = $hasRole;
 
       return response()->json([
