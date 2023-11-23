@@ -13,7 +13,6 @@ class EmailVerificationController extends Controller
   public function verify($id, Request $request)
   {
     try {
-
       $user = User::find($id);
 
       if (!hash_equals((string) $request->route('id'), (string) $id)) {
@@ -31,17 +30,17 @@ class EmailVerificationController extends Controller
         ], 400);
       }
 
-
       if (!$user->hasVerifiedEmail()) {
         $user->markEmailAsVerified();
+      } else {
+        // Email has already been verified
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Email has already been verified',
+        ], 400);
       }
 
-      // return redirect()->route('login)
-
-      // sementara direct ke home karena gapunya view login
-      // return redirect()->to('/');
-
-      // daripada direct mending return response biar jelas
+      // Continue with your success response
       return response()->json([
         'status' => 'success',
         'message' => 'Email verified successfully, directing to home/login'
@@ -60,6 +59,7 @@ class EmailVerificationController extends Controller
       ], 500);
     }
   }
+
 
   public function resend(Request $request)
   {

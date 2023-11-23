@@ -27,7 +27,7 @@ class UpdatePasswordController extends Controller
         ], 401);
       }
 
-      if (!Hash::check($request->input('new_password'), $user->password)) {
+      if (Hash::check($request->input('new_password'), $user->password)) {
         return response()->json([
           'status' => 'error',
           'message' => 'Your new password is the same as the current password',
