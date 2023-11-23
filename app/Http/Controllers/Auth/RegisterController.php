@@ -13,9 +13,9 @@ class RegisterController extends Controller
 {
   public function register(Request $request)
   {
-    $data = $request->only('name', 'email', 'password', 'password_confirmation');
+    $data = $request->only('username', 'email', 'password', 'password_confirmation');
     $validator = Validator::make($data, [
-      'name' => ['required', 'string', 'max:255'],
+      'username' => ['required', 'string', 'max:255', 'unique:users', 'regex:/\w*$/'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
       'password' => ['required', 'string', 'min:8', 'confirmed'],
     ]);
@@ -26,7 +26,7 @@ class RegisterController extends Controller
 
     try {
       $user = User::create([
-        'name' => $request->input("name"),
+        'username' => $request->input("username"),
         'email' => $request->input("email"),
         'password' => Hash::make($request->input("password")),
       ]);

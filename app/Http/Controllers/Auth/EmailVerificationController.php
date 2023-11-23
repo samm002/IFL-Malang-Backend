@@ -38,7 +38,6 @@ class EmailVerificationController extends Controller
     // return redirect()->route('login)
 
     // sementara direct ke home karena gapunya view login
-    // return redirect()->to('/');
 
     // daripada direct mending return response biar jelas
     return response()->json([
@@ -75,6 +74,6 @@ class EmailVerificationController extends Controller
     return response()->json([
       'status' => 'success',
       'message' => 'Verification link has been sent to your email'
-    ], 200);
+    ], 201);
   }
 }

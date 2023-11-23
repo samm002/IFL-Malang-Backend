@@ -58,7 +58,7 @@ class LoginController extends Controller
         'status' => 'success',
         'message' => 'Login success',
         'data' => $data,
-      ], 200);
+      ], 201);
     } catch (\Exception $e) {
       $errorType = get_class($e);
       return response()->json([
@@ -78,7 +78,7 @@ class LoginController extends Controller
       return response()->json([
         'status' => 'success',
         'message' => 'User has been logged out'
-      ]);
+      ], 200);
     } catch (\Exception $e) {
       $errorType = get_class($e);
       return response()->json([
