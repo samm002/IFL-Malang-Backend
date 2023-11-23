@@ -43,7 +43,7 @@ class EmailVerificationController extends Controller
       // Continue with your success response
       return response()->json([
         'status' => 'success',
-        'message' => 'Email verified successfully, directing to home/login'
+        'message' => 'Email verified successfully, directing to login page'
       ], 200);
     } catch (AuthorizationException $e) {
       return response()->json([
@@ -59,7 +59,6 @@ class EmailVerificationController extends Controller
       ], 500);
     }
   }
-
 
   public function resend(Request $request)
   {
