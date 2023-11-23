@@ -21,7 +21,7 @@ class CheckRole
     if (!$request->user()->hasRole($role)) {
       // abort(401, 'This action is unauthorized.');
       // return redirect('/welcome')->with('error', 'You are not authorized to access this page.');
-      return Redirect::guest(URL::route($redirectToRoute ?: 'account.notAdmin'));
+      return Redirect::guest(URL::route($redirectToRoute ?: 'notAdmin.notice'));
     }
     return $next($request);
   }

@@ -27,9 +27,10 @@ class LoginController extends Controller
       return response()->json(['error' => $validator->messages()], 200);
     }
 
+    $user = User::where('email', $credentials['email'])->first();
+
     try {
       if (!$token = JWTAuth::attempt($credentials)) {
-        $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
           throw ValidationException::withMessages([
@@ -53,6 +54,17 @@ class LoginController extends Controller
       $userId = auth()->user()->id;
 
       $data['token'] = $this->respondWithToken($userId, $token);
+
+      if ($user->hasRole(User::ROLE_ADMIN)) {
+        // Sementara response json
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Admin Login success',
+          'data' => $data,
+        ], 200);
+
+        // kalau udah ada view dashboard, direct ke admin dashboard
+      }
 
       return response()->json([
         'status' => 'success',
@@ -95,18 +107,15 @@ class LoginController extends Controller
     try {
       $expiration = JWTAuth::getPayload()->get('exp');
       $remainingTime = $expiration - time();
-      
-      // Check if the access token is about to expire or has expired
+
       if ($expiration < time()) {
-        // Attempt to refresh the access token
         $token = JWTAuth::refresh(JWTAuth::getToken());
 
-        // Update the client with the new access token
-        // For example, you can include the new token in the response
         return response()->json([
           'status' => 'success',
           'message' => 'Token refreshed successfully',
           'token' => $token,
+          'ttl' => $expiration,
         ]);
       }
 
@@ -127,10 +136,7 @@ class LoginController extends Controller
   public function checkTokenDuration()
   {
     try {
-      // Get the expiration time from the payload
       $expiration = JWTAuth::getPayload()->get('exp');
-
-      // Calculate the remaining time until the token expires
       $remainingTime = $expiration - time();
 
       return response()->json([

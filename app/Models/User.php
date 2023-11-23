@@ -15,6 +15,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
   use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
+  const ROLE_ADMIN = 'admin';
+  const ROLE_USER = 'user';
+  const ROLE_COPYWRITER = 'copywriter';
+  const ROLE_SHOP_MANAGER = 'shop manager';
+
   /**
    * Get the identifier that will be stored in the subject claim of the JWT.
    *
