@@ -13,20 +13,33 @@ class RegisterController extends Controller
 {
   public function register(Request $request)
   {
-    $data = $request->only('name', 'email', 'password', 'password_confirmation');
+    $data = $request->only('username', 'email', 'password', 'password_confirmation');
     $validator = Validator::make($data, [
-      'name' => ['required', 'string', 'max:255'],
+      'username' => ['required', 'string', 'max:255', 'unique:users', 'regex:/\w*$/'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-      'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'password' => [
+        'required',
+        'min:8',
+        'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/',
+        'confirmed'
+      ],
     ]);
 
     if ($validator->fails()) {
-      return response()->json(['error' => $validator->messages()], 200);
+      $errors = $validator->messages();
+
+      // Check if there are errors for the 'password' field
+      if ($errors->has('password')) {
+        // Add a custom error message for the password
+        $errors->add('detail', 'Password harus berisi setidaknya : 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)');
+      }
+
+      return response()->json(['error' => $errors], 400);
     }
 
     try {
       $user = User::create([
-        'name' => $request->input("name"),
+        'username' => $request->input("username"),
         'email' => $request->input("email"),
         'password' => Hash::make($request->input("password")),
       ]);
