@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Role_UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\NoticeController;
@@ -41,6 +42,16 @@ Route::prefix('v1')->group(function () {
   Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register');
     Route::post('login', [LoginController::class, 'login'])->name('login');
+
+    // Route::middleware('jwt.verify')->group(function () {
+    Route::get('email/verify', [NoticeController::class, 'emailNotVerifiedNotice'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
+    // });
+
+    //google login
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('refresh_token', [LoginController::class, 'refreshToken'])->name('refresh.token');
