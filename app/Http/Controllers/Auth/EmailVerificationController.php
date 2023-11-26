@@ -104,7 +104,7 @@ class EmailVerificationController extends Controller
       return response()->json([
         'status' => 'success',
         'message' => 'Verification link has been sent to your email'
-      ], 200);
+      ], 201);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
@@ -113,11 +113,11 @@ class EmailVerificationController extends Controller
       ], 500);
     }
 
-    $user->sendEmailVerificationNotification();
+    // $user->sendEmailVerificationNotification();
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Verification link has been sent to your email'
-    ], 201);
+    // return response()->json([
+    //   'status' => 'success',
+    //   'message' => 'Verification link has been sent to your email'
+    // ], 201);
   }
 }

@@ -50,8 +50,8 @@ Route::prefix('v1')->group(function () {
     // });
 
     //google login
-    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
-    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+    Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
+    Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('refresh_token', [LoginController::class, 'refreshToken'])->name('refresh.token');
