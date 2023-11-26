@@ -33,14 +33,12 @@ class EmailVerificationController extends Controller
       if (!$user->hasVerifiedEmail()) {
         $user->markEmailAsVerified();
       } else {
-        // Email has already been verified
         return response()->json([
           'status' => 'error',
           'message' => 'Email has already been verified',
         ], 400);
       }
 
-      // Continue with your success response
       return response()->json([
         'status' => 'success',
         'message' => 'Email verified successfully, directing to login page'
@@ -58,20 +56,6 @@ class EmailVerificationController extends Controller
         'error' => $e->getMessage(),
       ], 500);
     }
-
-    if (!$user->hasVerifiedEmail()) {
-      $user->markEmailAsVerified();
-    }
-
-    // return redirect()->route('login)
-
-    // sementara direct ke home karena gapunya view login
-
-    // daripada direct mending return response biar jelas
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Email verified successfully, directing to home/login'
-    ], 200);
   }
 
   public function resend(Request $request)
@@ -104,7 +88,7 @@ class EmailVerificationController extends Controller
       return response()->json([
         'status' => 'success',
         'message' => 'Verification link has been sent to your email'
-      ], 201);
+      ], 200);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
@@ -112,12 +96,32 @@ class EmailVerificationController extends Controller
         'error' => $e->getMessage(),
       ], 500);
     }
+  }
 
-    // $user->sendEmailVerificationNotification();
+  public function checkEmailVerified(Request $request)
+  {
+    try {
+      $email = $request->input('email');
+      $user = User::where('email', $email)->first();
 
-    // return response()->json([
-    //   'status' => 'success',
-    //   'message' => 'Verification link has been sent to your email'
-    // ], 201);
+      if ($user->email_verified_at) {
+        return response()->json([
+          'status' => 'success',
+          'message' => 'This email has been verified'
+        ], 200);
+      } else {
+        return response()->json([
+          'status' => 'success',
+          'message' => 'This email has not been verified, please verify using the link provided',
+          'verify link' => route('verification.resend'),
+        ], 200);
+      }
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Error resending verification email',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
   }
 }

@@ -4,30 +4,21 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Auth;
 use App\Traits\TokenResponse;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Log;
+use App\Traits\GoogleLogin;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class GoogleController extends Controller
 {
-  use TokenResponse;
+  use TokenResponse, GoogleLogin;
   public function redirectToGoogle()
   {
-    // $authUrl = Socialite::driver('google')
-    //   ->stateless()
-    //   ->redirectUrl(route('auth.google.callback'))
-    //   ->redirect()
-    //   ->getTargetUrl();
+    $authUrl = Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
 
-    // return response()->json(['auth_url' => $authUrl], 200);
-    return Socialite::driver('google')->stateless()->redirect();
+    return response()->json([
+      'auth_url' => $authUrl,
+    ]);
   }
 
   public function handleGoogleCallback()
@@ -35,52 +26,36 @@ class GoogleController extends Controller
     try {
       $googleUser = Socialite::driver('google')->stateless()->user();
 
-      // Check if the user exists in your local database
-      $localUser = User::where('email', $googleUser->getEmail())->first();
+      $user = User::where('email', $googleUser->getEmail())->first();
 
-      if (!$localUser) {
-        // User doesn't exist, perform registration
-        $localUser = User::create([
+      if (!$user) {
+        $user = User::create([
           'username' => $googleUser->getName(),
           'email' => $googleUser->getEmail(),
           'google_id' => $googleUser->getId(),
           'password' => Hash::make(12345678),
+          'email_verified_at' => now(),
         ]);
-        $localUser->email_verified_at = now();
       }
 
-      // Perform login logic using your JWT logic
-      $token = $this->jwtLogin($localUser);
+      $token = $this->login(['email' => $user->email, 'password' => '12345678']);
 
-      return response()->json([
-        'token' => $token,
-        'user' => $localUser,
-      ], 200);
+      if ($user->wasRecentlyCreated) {
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Register with google account success',
+          'user' => $user,
+          'data' => $token,
+        ], 200);
+      } else {
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Login with google account success',
+          'data' => $token,
+        ], 200);
+      }
     } catch (\Exception $e) {
-      // Log the exception for debugging
-      Log::error('Google authentication error: ' . $e->getMessage());
-
-      // Return a more informative error response
       return response()->json(['error' => 'Google authentication error', 'details' => $e->getMessage()], 500);
     }
-  }
-
-  protected function jwtLogin($user)
-  {
-    $token = JWTAuth::fromUser($user);
-
-    if (!$token) {
-      throw ValidationException::withMessages([
-        'credentials' => ['Invalid credentials'],
-      ]);
-    }
-
-    if (!$user->hasVerifiedEmail()) {
-      throw new AuthenticationException('User email not verified.');
-    }
-
-    $userId = $user->id;
-
-    return $this->respondWithToken($userId, $token);
   }
 }

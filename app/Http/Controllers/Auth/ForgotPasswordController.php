@@ -19,9 +19,18 @@ class ForgotPasswordController extends Controller
       $request->only('email')
     );
 
-    return $status === Password::RESET_LINK_SENT
-      ? response()->json(['status' => 'success', 'message' => 'Password reset email have been send', 'detail' => $status])
-      : response()->json(['status' => 'failed', 'message' => 'Error sending password reset email'], 500);
+    if ($status === Password::RESET_LINK_SENT) {
+      return response()->json([
+        'status' => 'success',
+        'message' => __('passwords.sent'),
+      ]);
+    } else {
+      $errorMessage = $this->getErrorMessage($status);
+      return response()->json([
+        'status' => 'failed',
+        'message' => $errorMessage,
+      ], 500);
+    }
   }
 
   public function showResetForm(Request $request)
@@ -58,8 +67,6 @@ class ForgotPasswordController extends Controller
           ])->save();
         }
       );
-
-
       return $response === Password::PASSWORD_RESET
         ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response])
         : response()->json(['status' => 'failed', 'message' => $response], 500);
@@ -76,5 +83,29 @@ class ForgotPasswordController extends Controller
         'error' => $e->getMessage(),
       ], 500);
     }
+  }
+
+  protected function getErrorMessage($status)
+  {
+    switch ($status) {
+      case Password::INVALID_USER:
+        return __('passwords.user');
+      case Password::INVALID_TOKEN:
+        return __('passwords.token');
+      case Password::RESET_THROTTLED:
+        $throttleTime = $this->getThrottleTime();
+        return __('passwords.throttled', ['minutes' => $throttleTime]);
+      default:
+        return __('passwords.user');
+    }
+  }
+
+  protected function getThrottleTime()
+  {
+    $throttleTimeSeconds = config('auth.passwords.users.throttle', 60);
+
+    $throttleTimeMinutes = ceil($throttleTimeSeconds / 60);
+
+    return $throttleTimeMinutes;
   }
 }

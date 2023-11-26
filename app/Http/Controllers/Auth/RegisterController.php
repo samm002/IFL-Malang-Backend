@@ -28,9 +28,7 @@ class RegisterController extends Controller
     if ($validator->fails()) {
       $errors = $validator->messages();
 
-      // Check if there are errors for the 'password' field
       if ($errors->has('password')) {
-        // Add a custom error message for the password
         $errors->add('detail', 'Password harus berisi setidaknya : 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)');
       }
 

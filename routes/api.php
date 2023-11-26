@@ -43,13 +43,12 @@ Route::prefix('v1')->group(function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register');
     Route::post('login', [LoginController::class, 'login'])->name('login');
 
-    // Route::middleware('jwt.verify')->group(function () {
-    Route::get('email/verify', [NoticeController::class, 'emailNotVerifiedNotice'])->name('verification.notice');
+    // Verify Email
     Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
-    // });
+    Route::post('email/check', [EmailVerificationController::class, 'checkEmailVerified'])->name('verification.check');
 
-    //google login
+    // Login Register With Google
     Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
     Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
@@ -60,12 +59,9 @@ Route::prefix('v1')->group(function () {
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
-    Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
-    Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
-
 
     Route::get('notice/notVerified', [NoticeController::class, 'emailNotVerifiedNotice'])->name('verification.notice');
     Route::get('notice/notAdmin', [NoticeController::class, 'userNotAdminNotice'])->name('notAdmin.notice');

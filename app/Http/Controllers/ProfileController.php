@@ -36,7 +36,7 @@ class ProfileController extends Controller
   {
     try {
       $request->validate([
-        'username' => 'string|nullable',
+        'name' => 'string|nullable',
         'address' => 'string|nullable',
         'phone_number' => 'numeric|nullable',
         'about_me' => 'string|nullable',
@@ -68,7 +68,7 @@ class ProfileController extends Controller
       }
 
       $user->update([
-        'username' => $request->input('username') ?? $user->username,
+        'name' => $request->input('name') ?? $user->name,
         'address' => $request->input('address') ?? $user->address,
         'phone_number' => $request->input('phone_number') ?? $user->phone_number,
         'about_me' => $request->input('about_me') ?? $user->about_me,
