@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use App\Traits\TokenResponse;
 
 class LoginController extends Controller
 {
+  use TokenResponse;
   public function login(Request $request)
   {
     $credentials = $request->only('email', 'password');
@@ -157,17 +159,5 @@ class LoginController extends Controller
         'error' => $e->getMessage(),
       ], 500);
     }
-  }
-
-  protected function respondWithToken($userId, $token)
-  {
-    return [
-      'user' => $userId,
-      'token' => [
-        'access_token' => $token,
-        'token_type' => 'bearer',
-        'expires_in' => auth()->factory()->getTTL() * 60
-      ]
-    ];
   }
 }
