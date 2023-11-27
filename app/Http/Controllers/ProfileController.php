@@ -54,18 +54,28 @@ class ProfileController extends Controller
           File::delete($path . '/' . $user->profile_picture);
         }
 
-        $posterImage = $user->id . "_profile_" . time() . '.' . $request->profile_picture->extension();
-        $request->profile_picture->move($path, $posterImage);
-      } 
+        $profilePicture = $user->id . "_profile_" . time() . '.' . $request->profile_picture->extension();
+        $request->profile_picture->move($path, $profilePicture);
+      }
 
+      if ($request->has('background_picture')) {
+        $path = public_path("/img/user/background_picture");
+
+        if ($user->background_picture && $user->background_picture !== 'default.png') {
+          File::delete($path . '/' . $user->background_picture);
+        }
+
+        $backgroundPicture = $user->id . "_background_" . time() . '.' . $request->background_picture->extension();
+        $request->background_picture->move($path, $backgroundPicture);
+      }
 
       $user->update([
-        'username' => $request->input('username') ?? $user->username,
         'name' => $request->input('name') ?? $user->name,
         'address' => $request->input('address') ?? $user->address,
         'phone_number' => $request->input('phone_number') ?? $user->phone_number,
         'about_me' => $request->input('about_me') ?? $user->about_me,
-        'profile_picture' => $posterImage ?? $user->profile_picture,
+        'profile_picture' => $profilePicture ?? $user->profile_picture,
+        'background_picture' => $backgroundPicture ?? $user->background_picture,
       ]);
 
 

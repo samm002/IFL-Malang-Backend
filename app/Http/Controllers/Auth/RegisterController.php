@@ -17,11 +17,22 @@ class RegisterController extends Controller
     $validator = Validator::make($data, [
       'username' => ['required', 'string', 'max:255', 'unique:users', 'regex:/\w*$/'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-      'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'password' => [
+        'required',
+        'min:8',
+        'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/',
+        'confirmed'
+      ],
     ]);
 
     if ($validator->fails()) {
-      return response()->json(['error' => $validator->messages()], 200);
+      $errors = $validator->messages();
+
+      if ($errors->has('password')) {
+        $errors->add('detail', 'Password harus berisi setidaknya : 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)');
+      }
+
+      return response()->json(['error' => $errors], 400);
     }
 
     try {

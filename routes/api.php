@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Role_UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\NoticeController;
@@ -42,6 +43,15 @@ Route::prefix('v1')->group(function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register');
     Route::post('login', [LoginController::class, 'login'])->name('login');
 
+    // Verify Email
+    Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
+    Route::post('email/check', [EmailVerificationController::class, 'checkEmailVerified'])->name('verification.check');
+
+    // Login Register With Google
+    Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
+    Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
       Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
@@ -49,8 +59,6 @@ Route::prefix('v1')->group(function () {
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
-    Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
-    Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdatePasswordController extends Controller
@@ -12,11 +13,27 @@ class UpdatePasswordController extends Controller
   public function updatePassword(Request $request)
   {
     try {
-
-      $request->validate([
+      $data = $request->only('current_password', 'new_password', 'new_password_confirmation');
+      $validator = Validator::make($data, [
         'current_password' => 'required|min:8',
-        'new_password' => 'required|min:8|confirmed'
+        'new_password' => [
+          'required',
+          'min:8',
+          'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/',
+          'confirmed'
+        ],        
       ]);
+
+      if ($validator->fails()) {
+        $errors = $validator->messages();
+  
+        if ($errors->has('new_password')) {
+
+          $errors->add('detail', 'Password harus berisi setidaknya : 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)');
+        }
+  
+        return response()->json(['error' => $errors], 400);
+      }
 
       $user = auth()->user();
 
@@ -31,7 +48,7 @@ class UpdatePasswordController extends Controller
         return response()->json([
           'status' => 'error',
           'message' => 'Your new password is the same as the current password',
-        ], 401);
+        ], 400);
       }
 
       $user->password = Hash::make($request->input('new_password'));
