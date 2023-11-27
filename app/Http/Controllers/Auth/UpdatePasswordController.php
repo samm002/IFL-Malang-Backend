@@ -45,7 +45,7 @@ class UpdatePasswordController extends Controller
       return response()->json([
         'status' => 'error',
         'message' => 'Validation error',
-        'errors' => $e->errors(),
+        'error' => $e->errors(),
       ], 422);
     } catch (\Exception $e) {
       return response()->json([

@@ -20,7 +20,7 @@ class ForgotPasswordController extends Controller
     );
 
     return $status === Password::RESET_LINK_SENT
-      ? response()->json(['status' => 'success', 'message' => 'Password reset email have been send', 'detail' => $status])
+      ? response()->json(['status' => 'success', 'message' => 'Password reset email have been send', 'detail' => $status],200)
       : response()->json(['status' => 'failed', 'message' => 'Error sending password reset email'], 500);
   }
 
@@ -29,12 +29,14 @@ class ForgotPasswordController extends Controller
     $token = $request->route()->parameter('token');
     $email = $request->query('email');
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'tampil reset form success',
-      'email' => $email,
-      'token' => $token,
-    ]);
+    return redirect("http://127.0.0.1:5173/reset-password?mail=$email&token=$token");
+
+    // return response()->json([
+    //   'status' => 'success',
+    //   'message' => 'tampil reset form success',
+    //   'email' => $email,
+    //   'token' => $token,
+    // ]);
     // return view('auth.passwords.reset')->with(
     //     ['token' => $token, 'email' => $request->email]
     // );
@@ -59,15 +61,14 @@ class ForgotPasswordController extends Controller
         }
       );
 
-
       return $response === Password::PASSWORD_RESET
-        ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response])
+        ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response],200)
         : response()->json(['status' => 'failed', 'message' => $response], 500);
     } catch (ValidationException $e) {
       return response()->json([
         'status' => 'error',
         'message' => 'Validation error',
-        'errors' => $e->errors(),
+        'error' => $e->errors(),
       ], 422);
     } catch (\Exception $e) {
       return response()->json([

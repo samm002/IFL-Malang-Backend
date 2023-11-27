@@ -43,9 +43,9 @@ Route::prefix('v1')->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login');
 
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
-      Route::get('refresh_token', [LoginController::class, 'refreshToken'])->name('refresh.token');
-      Route::get('check_token_duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
-      Route::post('update_password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
+      Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
+      Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
+      Route::post('update-password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
@@ -54,7 +54,6 @@ Route::prefix('v1')->group(function () {
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
-
 
     Route::get('notice/notVerified', [NoticeController::class, 'emailNotVerifiedNotice'])->name('verification.notice');
     Route::get('notice/notAdmin', [NoticeController::class, 'userNotAdminNotice'])->name('notAdmin.notice');

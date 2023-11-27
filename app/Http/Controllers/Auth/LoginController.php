@@ -61,7 +61,7 @@ class LoginController extends Controller
           'status' => 'success',
           'message' => 'Admin Login success',
           'data' => $data,
-        ], 200);
+        ], 201);
 
         // kalau udah ada view dashboard, direct ke admin dashboard
       }
@@ -116,14 +116,14 @@ class LoginController extends Controller
           'message' => 'Token refreshed successfully',
           'token' => $token,
           'ttl' => $expiration,
-        ]);
+        ],200);
       }
 
       return response()->json([
         'status' => 'success',
         'message' => 'Token is still valid',
         'ttl' => $remainingTime,
-      ]);
+      ],200);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',

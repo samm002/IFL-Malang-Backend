@@ -36,11 +36,13 @@ class ProfileController extends Controller
   {
     try {
       $request->validate([
-        'username' => 'string|nullable',
+        'name' => 'string|nullable',
+        'username' => 'string|nullable|unique:users',
         'address' => 'string|nullable',
         'phone_number' => 'numeric|nullable',
         'about_me' => 'string|nullable',
         'profile_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
+        'background_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
       ]);
 
       $user = auth()->user();
@@ -54,15 +56,18 @@ class ProfileController extends Controller
 
         $posterImage = $user->id . "_profile_" . time() . '.' . $request->profile_picture->extension();
         $request->profile_picture->move($path, $posterImage);
-      }
+      } 
+
 
       $user->update([
         'username' => $request->input('username') ?? $user->username,
+        'name' => $request->input('name') ?? $user->name,
         'address' => $request->input('address') ?? $user->address,
         'phone_number' => $request->input('phone_number') ?? $user->phone_number,
         'about_me' => $request->input('about_me') ?? $user->about_me,
         'profile_picture' => $posterImage ?? $user->profile_picture,
       ]);
+
 
       /* Kalau view udah ada, bisa pake :
             - return back()->with('message', 'Your profile has been completed');
@@ -78,7 +83,7 @@ class ProfileController extends Controller
       return response()->json([
         'status' => 'error',
         'message' => 'Validation error',
-        'errors' => $e->errors(),
+        'error' => $e->errors(),
       ], 422);
     } catch (\Exception $e) {
       return response()->json([

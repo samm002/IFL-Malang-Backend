@@ -41,10 +41,11 @@ class EmailVerificationController extends Controller
       }
 
       // Continue with your success response
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Email verified successfully, directing to login page'
-      ], 200);
+      return redirect("http://127.0.0.1:5173/verify?mail=$user->email");
+      // return response()->json([
+      //   'status' => 'success',
+      //   'message' => 'Email verified successfully, directing to login page'
+      // ], 200);
     } catch (AuthorizationException $e) {
       return response()->json([
         'status' => 'error',
@@ -63,15 +64,15 @@ class EmailVerificationController extends Controller
       $user->markEmailAsVerified();
     }
 
-    // return redirect()->route('login)
 
     // sementara direct ke home karena gapunya view login
 
     // daripada direct mending return response biar jelas
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Email verified successfully, directing to home/login'
-    ], 200);
+    // return response()->json([
+    //   'status' => 'success',
+    //   'message' => 'Email verified successfully, directing to home/login',
+    //   'user' => $user
+    // ], 200);
   }
 
   public function resend(Request $request)
