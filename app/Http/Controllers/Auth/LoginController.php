@@ -26,7 +26,7 @@ class LoginController extends Controller
     ]);
 
     if ($validator->fails()) {
-      return response()->json(['error' => $validator->messages()], 200);
+      return response()->json(['error' => $validator->messages()], 400);
     }
 
     $user = User::where('email', $credentials['email'])->first();
@@ -37,15 +37,15 @@ class LoginController extends Controller
         if (!$user) {
           throw ValidationException::withMessages([
             'credentials' => [trans('auth.failed')],
-          ]);
+          ])->status(404);
         } elseif (!Hash::check($request->password, optional($user)->getAuthPassword())) {
           throw ValidationException::withMessages([
             'credentials' => [trans('auth.password')],
-          ]);
+          ])->status(401);
         } else {
           throw ValidationException::withMessages([
             'credentials' => ['Invalid credentials'],
-          ]);
+          ])->status(401);
         }
       }
 
@@ -63,7 +63,7 @@ class LoginController extends Controller
           'status' => 'success',
           'message' => 'Admin Login success',
           'data' => $data,
-        ], 201);
+        ], 200);
 
         // kalau udah ada view dashboard, direct ke admin dashboard
       }
@@ -72,7 +72,7 @@ class LoginController extends Controller
         'status' => 'success',
         'message' => 'Login success',
         'data' => $data,
-      ], 201);
+      ], 200);
     } catch (\Exception $e) {
       $errorType = get_class($e);
       return response()->json([
@@ -118,14 +118,14 @@ class LoginController extends Controller
           'message' => 'Token refreshed successfully',
           'token' => $token,
           'ttl' => $expiration,
-        ],200);
+        ], 200);
       }
 
       return response()->json([
         'status' => 'success',
         'message' => 'Token is still valid',
         'ttl' => $remainingTime,
-      ],200);
+      ], 200);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',

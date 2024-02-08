@@ -7,7 +7,9 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\RegisterUser;
+use App\Events\ForgotPassword;
 use App\Listeners\SendEmailVerification;
+use App\Listeners\SendPasswordResetEmail;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,9 @@ class EventServiceProvider extends ServiceProvider
     ],
     RegisterUser::class => [
       SendEmailVerification::class,
+    ],
+    ForgotPassword::class => [
+      SendPasswordResetEmail::class,
     ],
   ];
 

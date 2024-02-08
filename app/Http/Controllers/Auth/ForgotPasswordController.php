@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Events\ForgotPassword;
+use App\Models\User;
 
 class ForgotPasswordController extends Controller
 {
@@ -15,21 +17,18 @@ class ForgotPasswordController extends Controller
   {
     $request->validate(['email' => 'required|email']);
 
-    $status = Password::sendResetLink(
-      $request->only('email')
-    );
+    $user = User::where('email', $request->email)->first();
 
-    if ($status === Password::RESET_LINK_SENT) {
+    if (!$user) {
+      throw ValidationException::withMessages([
+        'credentials' => [trans('auth.failed')],
+      ])->status(404);
+    } else {
+      event(new ForgotPassword($user->email));
       return response()->json([
         'status' => 'success',
         'message' => __('passwords.sent'),
       ]);
-    } else {
-      $errorMessage = $this->getErrorMessage($status);
-      return response()->json([
-        'status' => 'failed',
-        'message' => $errorMessage,
-      ], 500);
     }
   }
 
@@ -38,14 +37,14 @@ class ForgotPasswordController extends Controller
     $token = $request->route()->parameter('token');
     $email = $request->query('email');
 
-    return redirect("http://127.0.0.1:5173/reset-password?mail=$email&token=$token");
+    // return redirect("http://127.0.0.1:5173/reset-password?mail=$email&token=$token");
 
-    // return response()->json([
-    //   'status' => 'success',
-    //   'message' => 'tampil reset form success',
-    //   'email' => $email,
-    //   'token' => $token,
-    // ]);
+    return response()->json([
+      'status' => 'success',
+      'message' => 'tampil reset form success',
+      'email' => $email,
+      'token' => $token,
+    ]);
     // return view('auth.passwords.reset')->with(
     //     ['token' => $token, 'email' => $request->email]
     // );
@@ -70,7 +69,7 @@ class ForgotPasswordController extends Controller
         }
       );
       return $response === Password::PASSWORD_RESET
-        ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response],200)
+        ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response], 200)
         : response()->json(['status' => 'failed', 'message' => $response], 500);
     } catch (ValidationException $e) {
       return response()->json([
