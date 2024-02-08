@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Role;
+use App\Events\RegisterUser;
 
 class RegisterController extends Controller
 {
@@ -48,7 +49,8 @@ class RegisterController extends Controller
 
       $hasRole = $user->roles()->pluck('name')->first();
 
-      $user->sendEmailVerificationNotification();
+      // $user->sendEmailVerificationNotification();
+      event(new RegisterUser($user));
 
       $data["user"] = $user;
       $data["user"]["role"] = $hasRole;
