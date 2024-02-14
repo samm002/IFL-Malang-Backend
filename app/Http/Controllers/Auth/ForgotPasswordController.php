@@ -8,8 +8,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Events\ForgotPassword;
 use App\Models\User;
+use App\Jobs\SendResetPasswordLink;
 
 class ForgotPasswordController extends Controller
 {
@@ -24,7 +24,7 @@ class ForgotPasswordController extends Controller
         'credentials' => [trans('auth.failed')],
       ])->status(404);
     } else {
-      event(new ForgotPassword($user->email));
+      SendResetPasswordLink::dispatch($request->email);
       return response()->json([
         'status' => 'success',
         'message' => __('passwords.sent'),
@@ -56,7 +56,14 @@ class ForgotPasswordController extends Controller
       $request->validate([
         'token' => 'required',
         'email' => 'required|email',
-        'password' => 'required|min:8|confirmed',
+        'password' => [
+          'required',
+          'min:8',
+          'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/',
+          'confirmed'
+        ],
+      ], [
+        'password.regex' => 'Password harus berisi setidaknya: 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)'
       ]);
 
       $response = Password::reset(
@@ -68,9 +75,11 @@ class ForgotPasswordController extends Controller
           ])->save();
         }
       );
+
       return $response === Password::PASSWORD_RESET
-        ? response()->json(['status' => 'success', 'message' => 'Your password have been changed', 'detail' => $response], 200)
-        : response()->json(['status' => 'failed', 'message' => $response], 500);
+        ? response()->json(['status' => 'success', 'message' => trans($response)], 200)
+        // : response()->json(['status' => 'failed', 'message' => trans($response)], 400);
+        : response()->json(['status' => 'failed', 'message' => $this->getErrorMessage($response)], 400);
     } catch (ValidationException $e) {
       return response()->json([
         'status' => 'error',

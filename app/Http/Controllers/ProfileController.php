@@ -15,7 +15,7 @@ class ProfileController extends Controller
       $user = auth()->user();
       $role = $user->roles()->pluck('name')->first();
 
-      $user['pass'] = auth()->user()->password;
+      // $user['pass'] = auth()->user()->password;
       $user['role'] = $role;
 
       return response()->json([
@@ -54,7 +54,7 @@ class ProfileController extends Controller
           File::delete($path . '/' . $user->profile_picture);
         }
 
-        $profilePicture = $user->id . "_profile_" . time() . '.' . $request->profile_picture->extension();
+        $profilePicture = $user->username . "-profile-" . time() . '.' . $request->profile_picture->extension();
         $request->profile_picture->move($path, $profilePicture);
       }
 
@@ -65,7 +65,7 @@ class ProfileController extends Controller
           File::delete($path . '/' . $user->background_picture);
         }
 
-        $backgroundPicture = $user->id . "_background_" . time() . '.' . $request->background_picture->extension();
+        $backgroundPicture = $user->username . "-background-" . time() . '.' . $request->background_picture->extension();
         $request->background_picture->move($path, $backgroundPicture);
       }
 

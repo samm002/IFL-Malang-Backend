@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Role;
-use App\Events\RegisterUser;
+use App\Jobs\SendActivationEmail;
 
 class RegisterController extends Controller
 {
@@ -16,7 +16,7 @@ class RegisterController extends Controller
   {
     $data = $request->only('username', 'email', 'password', 'password_confirmation');
     $validator = Validator::make($data, [
-      'username' => ['required', 'string', 'max:255', 'unique:users', 'regex:/\w*$/'],
+      'username' => ['required', 'string', 'max:255', 'unique:users', 'regex:/^\S*$/'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
       'password' => [
         'required',
@@ -49,8 +49,7 @@ class RegisterController extends Controller
 
       $hasRole = $user->roles()->pluck('name')->first();
 
-      // $user->sendEmailVerificationNotification();
-      event(new RegisterUser($user));
+      SendActivationEmail::dispatch($user);
 
       $data["user"] = $user;
       $data["user"]["role"] = $hasRole;

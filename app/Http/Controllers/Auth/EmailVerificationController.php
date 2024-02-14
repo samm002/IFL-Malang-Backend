@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Events\RegisterUser;
+use App\Jobs\SendActivationEmail;
 
 class EmailVerificationController extends Controller
 {
@@ -85,7 +87,7 @@ class EmailVerificationController extends Controller
         ], 200);
       }
 
-      $user->sendEmailVerificationNotification();
+      SendActivationEmail::dispatch($user);
 
       return response()->json([
         'status' => 'success',

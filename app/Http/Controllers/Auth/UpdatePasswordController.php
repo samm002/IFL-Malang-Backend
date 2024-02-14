@@ -22,6 +22,8 @@ class UpdatePasswordController extends Controller
           'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/',
           'confirmed'
         ],        
+      ], [
+        'password.regex' => 'Password harus berisi setidaknya: 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)'
       ]);
 
       if ($validator->fails()) {

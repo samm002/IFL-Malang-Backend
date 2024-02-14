@@ -79,12 +79,12 @@ Route::prefix('v1')->group(function () {
       Route::get('role_user/user_id/{user}', [Role_UserController::class, 'showByUserId']);
       Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
     });
-  });
 
-  Route::prefix('user')->group(function () {
-    Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
-    Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
-    Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
-    Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+    Route::group(['prefix' => 'user', 'middleware' => 'role:admin'], function () {
+      Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
+      Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
+      Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
+      Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+    });
   });
 });

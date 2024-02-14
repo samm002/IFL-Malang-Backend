@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\Role_User;
 
 class UserController extends Controller
 {
@@ -11,6 +13,12 @@ class UserController extends Controller
   {
     try {
       $users = User::all();
+
+      foreach ($users as $user) {
+        $roleNames = $user->roles->pluck('name')->toArray();
+        $user->role = $roleNames[0];
+        unset($user->roles);
+      }
 
       return response()->json([
         'status' => 'success',
@@ -41,7 +49,7 @@ class UserController extends Controller
       return response()->json([
         'status' => 'error',
         'message' => 'Get user by email failed',
-        'error' => $e->getMessage(),
+        'error' => 'User with email : ' . $email . ' not found',
       ], 500);
     }
   }
