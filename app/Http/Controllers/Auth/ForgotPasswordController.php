@@ -53,6 +53,8 @@ class ForgotPasswordController extends Controller
   public function reset(Request $request)
   {
     try {
+      $user_oldPassword = Password::broker()->getUser($request->only('email', 'token'))->password;
+      // dd($user_oldPassword)
       $request->validate([
         'token' => 'required',
         'email' => 'required|email',
@@ -66,6 +68,13 @@ class ForgotPasswordController extends Controller
         'password.regex' => 'Password harus berisi setidaknya: 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)'
       ]);
 
+      if ($user_oldPassword && Hash::check($request->input('password'), $user_oldPassword)) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Your new password is the same as the current password!',
+        ], 400);
+      }
+
       $response = Password::reset(
         $request->only('email', 'password', 'password_confirmation', 'token'),
         function ($user, $password) {
@@ -78,8 +87,7 @@ class ForgotPasswordController extends Controller
 
       return $response === Password::PASSWORD_RESET
         ? response()->json(['status' => 'success', 'message' => trans($response)], 200)
-        // : response()->json(['status' => 'failed', 'message' => trans($response)], 400);
-        : response()->json(['status' => 'failed', 'message' => $this->getErrorMessage($response)], 400);
+        : response()->json(['status' => 'failed', 'message' => trans($this->getErrorMessage($response))], 400);
     } catch (ValidationException $e) {
       return response()->json([
         'status' => 'error',

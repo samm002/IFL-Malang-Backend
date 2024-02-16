@@ -251,7 +251,7 @@ class Role_UserController extends Controller
       $request->validate([
         'role_id' => 'uuid|nullable',
       ]);
-      
+
       $user = User::where('id', $user_id)->first();
 
       if (!$user) {
@@ -295,8 +295,40 @@ class Role_UserController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function destroy($id)
+  public function destroy($role_user_id)
   {
-    //
+    try {
+      $role_user = Role_User::where('id', $role_user_id)->first();
+      
+      if (!$role_user) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Role_user not found with the given pivot id',
+        ], 404);
+      }
+      
+      $user = User::where('id', $role_user->user_id)->first();
+      if (!$user) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'user not found with the given pivot id',
+        ], 404);
+      }
+
+      $role_user->delete();
+      $user->delete();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'User deleted successfully',
+        'data' => $user,
+      ], 200);
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Error deleting user',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
   }
 }
