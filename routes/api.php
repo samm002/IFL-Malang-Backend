@@ -77,6 +77,8 @@ Route::prefix('v1')->group(function () {
       Route::apiResource('role', RoleController::class);
       Route::apiResource('role_user', Role_UserController::class);
       Route::put('role_user/user_id/{user}/update', [Role_UserController::class, 'updateByUserId']);
+      Route::put('role_user/pivot_id/{role_user}/update', [Role_UserController::class, 'updateByPivotId']);
+      Route::get('role_user/pivot_id/{role_user}', [Role_UserController::class, 'showById']);
       Route::get('role_user/user_id/{user}', [Role_UserController::class, 'showByUserId']);
       Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
     });

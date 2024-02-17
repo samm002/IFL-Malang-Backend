@@ -26,33 +26,15 @@ class Role_UserController extends Controller
         $user = User::find($role_user->user_id);
         $role = Role::find($role_user->role_id);
 
-        if ($user->username) {
-          $userData = [
-            'pivot_id' => $pivotId,
-            'username' => $user->username,
-            'email' => $user->email,
-            'role' => $role->name,
-            'updated_at' => $role_user->updated_at,
-          ];
-        } elseif ($user->name) {
-          $userData = [
-            'pivot_id' => $pivotId,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $role->name,
-            'updated_at' => $role_user->updated_at,
-          ];
-        } else {
-          $userData = [
-            'pivot_id' => $pivotId,
-            'name' => $user->name,
-            'username' => $user->username,
-            'email' => $user->email,
-            'role' => $role->name,
-            'updated_at' => $role_user->updated_at,
-          ];
-        }
-
+        $userData = [
+          'pivot_id' => $pivotId,
+          'id' => $user->id,
+          'username' => $user->username,
+          'name' => $user->name,
+          'email' => $user->email,
+          'role' => $role->name,
+          'updated_at' => $role_user->updated_at,
+        ];
         return $userData;
       });
 
@@ -98,8 +80,9 @@ class Role_UserController extends Controller
    * @return \Illuminate\Http\Response
    */
 
-  public function show(Role_User $role_user)
+  public function showByPivotID($role_user_id)
   {
+    $role_user = Role_User::where('id', $role_user_id)->first();
     try {
       if (!$role_user) {
         return response()->json([
@@ -131,17 +114,16 @@ class Role_UserController extends Controller
     }
   }
 
-  public function showByUserId(User $user)
+  public function showByUserId($user_id)
   {
     try {
+      $user = User::where('id', $user_id)->first();
       if (!$user) {
         return response()->json([
           'status' => 'error',
-          'message' => 'user not found with the given ID',
-          'error' => 'Not Found',
+          'message' => 'User not found with the given id',
         ], 404);
       }
-
       $role_user = Role_User::where('user_id', $user->id)->first();
       $user['pass'] = $user->password;
       $role = Role::find($role_user->role_id);
@@ -164,18 +146,17 @@ class Role_UserController extends Controller
     }
   }
 
-  public function showByRoleId(Role $role)
+  public function showByRoleId($role_id)
   {
     try {
+      $role = Role::find($role_id);
       if (!$role) {
         return response()->json([
           'status' => 'error',
-          'message' => 'user not found with the given ID',
-          'error' => 'Not Found',
+          'message' => 'User not found with the given id',
         ], 404);
       }
-
-      $role_users = Role_User::where('role_id', $role->id)->get();
+      $role_users = Role_User::where('role_id', $role_id)->get();
 
       $roleUsersData = [];
 
@@ -184,71 +165,28 @@ class Role_UserController extends Controller
           'pivot_id' => $role_user->id,
           'user' => User::find($role_user->user_id),
         ];
-
         $roleUsersData[] = $data;
       }
 
-      if (!$role_user) {
+      if ($role_users->isEmpty()) {
         return response()->json([
           'status' => 'error',
-          'message' => 'user with role' . $role->name . 'not found',
-          'error' => 'Not Found',
+          'message' => 'No users found with role id' . $role->id,
         ], 404);
       }
 
-      // $user['pass'] = $user->password;
-      $role = Role::find($role->id);
-
       return response()->json([
         'status' => 'success',
-        'message' => 'Role_user details by user id retrieved successfully',
+        'message' => 'Getting users from role_id success',
         'data' => [
           'role' => $role,
-          'user' => $roleUsersData
+          'users' => $roleUsersData,
         ],
       ], 200);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
         'message' => 'Error retrieving role_user details',
-        'error' => $e->getMessage(),
-      ], 500);
-    }
-  }
-
-  public function showByRoleId2(Role $role)
-  {
-    try {
-      if (!$role) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Role not found with the given ID',
-          'error' => 'Not Found',
-        ], 404);
-      }
-
-      // Assuming you have a pivot table named role_user
-      $users = $role->users;
-
-      // If you want to include additional information, you can customize the response
-      $responseData = $users->map(function ($user) use ($role) {
-        $user['pass'] = $user->password;
-        return [
-          'pivot_id' => $user->pivot->id,
-          'user' => $user,
-          'role' => $role,
-        ];
-      });
-
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Users with the given role ID retrieved successfully',
-        'data' => $responseData,
-      ], 200);
-    } catch (\Exception $e) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Error retrieving user details by role ID',
         'error' => $e->getMessage(),
       ], 500);
     }
@@ -272,29 +210,26 @@ class Role_UserController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function update(Request $request, Role_User $role_user)
+  public function updateByPivotId(Request $request, $role_user_id)
   {
-    $user_id = $role_user->user_id;
     try {
       $request->validate([
         'role_id' => 'uuid|required',
       ]);
 
+      $role_user = Role_User::where('id', $role_user_id)->first();
+
       if (!$role_user) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Role_User not found with the given ID',
-          'error' => 'Not Found',
+          'message' => 'role_user not found with the given ID',
         ], 404);
       }
-      $role_user->user_id = $user_id;
+
       $role_user->role_id = $request->input('role_id');
       $role_user->save();
 
       $role_user->touch();
-
-      //atau
-      // $role_user->updated_at = now();
 
       return response()->json([
         'status' => 'success',
@@ -310,18 +245,19 @@ class Role_UserController extends Controller
     }
   }
 
-  public function updateByUserId(Request $request, User $user)
+  public function updateByUserId(Request $request, $user_id)
   {
     try {
       $request->validate([
         'role_id' => 'uuid|nullable',
       ]);
 
+      $user = User::where('id', $user_id)->first();
+
       if (!$user) {
         return response()->json([
           'status' => 'error',
-          'message' => 'User not found with the given ID',
-          'error' => 'Not Found',
+          'message' => 'User not found with the given id',
         ], 404);
       }
 
@@ -331,7 +267,6 @@ class Role_UserController extends Controller
         return response()->json([
           'status' => 'error',
           'message' => 'Role_User not found for the given user ID',
-          'error' => 'Not Found',
         ], 404);
       }
 
@@ -360,8 +295,40 @@ class Role_UserController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function destroy($id)
+  public function destroy($role_user_id)
   {
-    //
+    try {
+      $role_user = Role_User::where('id', $role_user_id)->first();
+      
+      if (!$role_user) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Role_user not found with the given pivot id',
+        ], 404);
+      }
+      
+      $user = User::where('id', $role_user->user_id)->first();
+      if (!$user) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'user not found with the given pivot id',
+        ], 404);
+      }
+
+      $role_user->delete();
+      $user->delete();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'User deleted successfully',
+        'data' => $user,
+      ], 200);
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Error deleting user',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
   }
 }
