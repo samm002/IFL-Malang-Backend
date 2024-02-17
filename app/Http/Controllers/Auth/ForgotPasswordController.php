@@ -37,14 +37,14 @@ class ForgotPasswordController extends Controller
     $token = $request->route()->parameter('token');
     $email = $request->query('email');
 
-    // return redirect("http://127.0.0.1:5173/reset-password?mail=$email&token=$token");
+    return redirect("http://localhost:5173/reset-password?mail=$email&token=$token");
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'tampil reset form success',
-      'email' => $email,
-      'token' => $token,
-    ]);
+    // return response()->json([
+    //   'status' => 'success',
+    //   'message' => 'tampil reset form success',
+    //   'email' => $email,
+    //   'token' => $token,
+    // ]);
     // return view('auth.passwords.reset')->with(
     //     ['token' => $token, 'email' => $request->email]
     // );

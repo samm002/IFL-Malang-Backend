@@ -106,25 +106,18 @@ class LoginController extends Controller
 
   public function refreshToken()
   {
+    $token = JWTAuth::getToken();
+    
+    if(!$token) { 
+      return response()->json(['message' => 'Token not provided'], 401);
+    }
+
     try {
-      $expiration = JWTAuth::getPayload()->get('exp');
-      $remainingTime = $expiration - time();
-
-      if ($expiration < time()) {
-        $token = JWTAuth::refresh(JWTAuth::getToken());
-
-        return response()->json([
-          'status' => 'success',
-          'message' => 'Token refreshed successfully',
-          'token' => $token,
-          'ttl' => $expiration,
-        ], 200);
-      }
-
+      $newToken = JWTAuth::refresh($token);
       return response()->json([
         'status' => 'success',
-        'message' => 'Token is still valid',
-        'ttl' => $remainingTime,
+        'message' => 'Session has been extended successfully',
+        'token' => $newToken,
       ], 200);
     } catch (\Exception $e) {
       return response()->json([

@@ -42,11 +42,11 @@ class EmailVerificationController extends Controller
       }
 
       // Continue with your success response
-      // return redirect("http://127.0.0.1:5173/verify?mail=$user->email");
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Email verified successfully, directing to login page'
-      ], 200);
+      return redirect("http://localhost:5173/verify?mail=$user->email");
+      // return response()->json([
+      //   'status' => 'success',
+      //   'message' => 'Email verified successfully, directing to login page'
+      // ], 200);
     } catch (AuthorizationException $e) {
       return response()->json([
         'status' => 'error',

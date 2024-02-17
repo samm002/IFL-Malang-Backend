@@ -52,8 +52,9 @@ Route::prefix('v1')->group(function () {
     Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
     Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
+    Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
+    
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
-      Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
       Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
       Route::post('update-password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
