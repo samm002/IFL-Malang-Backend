@@ -30,7 +30,7 @@ class RegisterController extends Controller
       $errors = $validator->messages();
 
       if ($errors->has('password')) {
-        $errors->add('detail', 'Password harus berisi setidaknya : 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)');
+        $errors->add('detail', 'Passwords must contain at least: 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol (such as !, @, $, #, ^, etc.)');
       }
 
       return response()->json(['error' => $errors], 400);

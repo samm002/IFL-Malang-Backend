@@ -12,7 +12,6 @@ class Role_User extends Pivot
 
     protected $table = 'role_user';
 
-
     protected $fillable = [
       'user_id',
       'role_id',

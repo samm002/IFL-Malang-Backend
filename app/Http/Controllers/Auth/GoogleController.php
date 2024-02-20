@@ -33,6 +33,7 @@ class GoogleController extends Controller
           'username' => $googleUser->getName(),
           'email' => $googleUser->getEmail(),
           'google_id' => $googleUser->getId(),
+          'profile_picture'=> $googleUser->getAvatar(),
           'password' => Hash::make(12345678),
           'email_verified_at' => now(),
         ]);

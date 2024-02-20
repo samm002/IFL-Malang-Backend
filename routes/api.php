@@ -44,7 +44,7 @@ Route::prefix('v1')->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login');
 
     // Verify Email
-    Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+    // Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
     Route::post('email/check', [EmailVerificationController::class, 'checkEmailVerified'])->name('verification.check');
 
@@ -52,11 +52,11 @@ Route::prefix('v1')->group(function () {
     Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
     Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
+    // extend session
     Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
     
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
-      Route::post('update-password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
