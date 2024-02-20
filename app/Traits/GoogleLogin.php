@@ -28,37 +28,44 @@ trait GoogleLogin
     $user = User::where('email', $credentials['email'])->first();
 
     try {
-      if (!$token = JWTAuth::attempt($credentials)) {
+      if (!$user->google_id) {
+        $notGooleAccountToken = JWTAuth::fromUser($user);
+        $token = $this->respondWithToken($user->id, $notGooleAccountToken);
+      } else {
 
-        if (!$user) {
-          throw ValidationException::withMessages([
-            'credentials' => [trans('auth.failed')],
-          ]);
-        } elseif (!Hash::check($credentials->password, optional($user)->getAuthPassword())) {
-          throw ValidationException::withMessages([
-            'credentials' => [trans('auth.password')],
-          ]);
-        } else {
-          throw ValidationException::withMessages([
-            'credentials' => ['Invalid credentials'],
-          ]);
+        if (!$token = JWTAuth::attempt($credentials)) {
+
+          if (!$user) {
+            throw ValidationException::withMessages([
+              'credentials' => [trans('auth.failed')],
+            ]);
+          } elseif (!Hash::check($credentials->password, optional($user)->getAuthPassword())) {
+            throw ValidationException::withMessages([
+              'credentials' => [trans('auth.password')],
+            ]);
+          } else {
+            throw ValidationException::withMessages([
+              'credentials' => ['Invalid credentials'],
+            ]);
+          }
         }
+
+        if (!$user->hasVerifiedEmail()) {
+          throw new AuthenticationException('User email not verified.');
+        }
+        $userId = auth()->user()->id;
+
+        $token = $this->respondWithToken($userId, $token);
       }
-
-      if (!$user->hasVerifiedEmail()) {
-        throw new AuthenticationException('User email not verified.');
-      }
-
-      $userId = auth()->user()->id;
-
-      $token = $this->respondWithToken($userId, $token);
-
       if ($user->hasRole(User::ROLE_ADMIN)) {
-        return $token;
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Admin Login success',
+          'data' => $token,
+        ], 200);
       }
 
       return $token;
-      
     } catch (\Exception $e) {
       $errorType = get_class($e);
       return [

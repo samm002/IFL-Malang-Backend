@@ -49,11 +49,19 @@ class GoogleController extends Controller
           'data' => $token,
         ], 200);
       } else {
-        return response()->json([
-          'status' => 'success',
-          'message' => 'Login with google account success',
-          'data' => $token,
-        ], 200);
+        if ($user->google_id) {
+          return response()->json([
+            'status' => 'success',
+            'message' => 'Login with google account success',
+            'data' => $token,
+          ], 200);
+        } else {
+          return response()->json([
+            'status' => 'success',
+            'message' => 'Login with email success',
+            'data' => $token,
+          ], 200);
+        }
       }
     } catch (\Exception $e) {
       return response()->json(['error' => 'Google authentication error', 'details' => $e->getMessage()], 500);
