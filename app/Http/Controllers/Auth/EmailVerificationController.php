@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
-use App\Events\RegisterUser;
 use App\Jobs\SendActivationEmail;
 
 class EmailVerificationController extends Controller
@@ -26,50 +25,56 @@ class EmailVerificationController extends Controller
       }
 
       if (!$request->hasValidSignature()) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Email verification failed'
-        ], 400);
+        return view("auth.notification-email",[
+          "titleHead" => "Email Verified Error",
+          "title" => "Email verification failed",
+          "message" => "Your email has not a valid signature",
+          "isErrorImg" => true
+        ]);
       }
 
       if (!$user->hasVerifiedEmail()) {
         $user->markEmailAsVerified();
       } else {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Email has already been verified',
-        ], 400);
+        return view("auth.notification-email",[
+          "titleHead" => "Email Verified",
+          "title" => "Your email was verified a moment ago",
+          "message" => "You can login now!",
+          "isErrorImg" => false
+        ]);
       }
 
-      // Continue with your success response
-      // return redirect("http://127.0.0.1:5173/verify?mail=$user->email");
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Email verified successfully, directing to login page'
-      ], 200);
+      return view("auth.notification-email",[
+        "titleHead" => "Email Verified",
+        "title" => "Email has been verified",
+        "message" => "Your email has been successfully verified. You can now login and access all features!",
+        "isErrorImg" => false
+      ]);
+
     } catch (AuthorizationException $e) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Authorization error',
-        'error' => $e->getMessage(),
-      ], 403);
+      return view("auth.notification-email",[
+        "titleHead" => "Email Verified Error",
+        "title" => "Authorization error",
+        "message" => $e->getMessage(),
+        "isErrorImg" => true
+      ]);
+
     } catch (\Exception $e) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Error verifying email',
-        'error' => $e->getMessage(),
-      ], 500);
+      return view("auth.notification-email",[
+        "titleHead" => "Email Verified Error",
+        "title" => "Error verifying email",
+        "message" => $e->getMessage(),
+        "isErrorImg" => true
+      ]);
     }
   }
 
   public function resend(Request $request)
   {
     try {
-
       $validator = Validator::make($request->all(), [
         'email' => 'required|email|exists:users,email',
       ]);
-
       if ($validator->fails()) {
         return response()->json([
           'status' => 'error',

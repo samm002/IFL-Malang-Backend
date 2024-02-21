@@ -1,0 +1,93 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+*,
+*::before,
+*::after,
+html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+.wrapper {
+    background-image: url("../image/background-login.webp");
+    width: 100%;
+    min-height: 100vh;
+    background-position: bottom;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.wrapper::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(3, 5, 94, 0.5) 0%,
+        rgba(0, 150, 199, 0.5) 100%
+    );
+}
+
+.content {
+    box-shadow: 0 0px 5px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 670px;
+    padding: 32px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 16px;
+    z-index: 1;
+}
+
+.notification-email {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.notification-email > h1 {
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 28px;
+}
+
+.notification-email > .icon {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    animation: moveLeftRight 4s infinite;
+}
+
+@media screen and (max-width: 580px) {
+    .notification-email > h1 {
+        font-size: 20px;
+        letter-spacing: 0.5px;
+    }
+    .notification-email > .icon {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@keyframes moveLeftRight {
+    0% {
+        transform: translateX(-20px) rotate(-10deg);
+    }
+    50% {
+        transform: translateX(20px) rotate(10deg);
+    }
+    100% {
+        transform: translateX(-20px) rotate(-10deg);
+    }
+}

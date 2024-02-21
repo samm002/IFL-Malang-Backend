@@ -37,17 +37,7 @@ class ForgotPasswordController extends Controller
     $token = $request->route()->parameter('token');
     $email = $request->query('email');
 
-    // return redirect("http://127.0.0.1:5173/reset-password?mail=$email&token=$token");
-
-    return response()->json([
-      'status' => 'success',
-      'message' => 'tampil reset form success',
-      'email' => $email,
-      'token' => $token,
-    ]);
-    // return view('auth.passwords.reset')->with(
-    //     ['token' => $token, 'email' => $request->email]
-    // );
+    return redirect("http://localhost:5173/reset-password?mail=$email&token=$token");
   }
 
   public function reset(Request $request)
@@ -65,7 +55,7 @@ class ForgotPasswordController extends Controller
           'confirmed'
         ],
       ], [
-        'password.regex' => 'Password harus berisi setidaknya: 1 huruf kecil, 1 huruf besar, 1 angka, dan 1 simbol (seperti !, @, $, #, ^, dll)'
+        'password.regex' => 'Passwords must contain at least: 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol (such as !, @, $, #, ^, etc.)'
       ]);
 
       if ($user_oldPassword && Hash::check($request->input('password'), $user_oldPassword)) {
@@ -91,14 +81,12 @@ class ForgotPasswordController extends Controller
     } catch (ValidationException $e) {
       return response()->json([
         'status' => 'error',
-        'message' => 'Validation error',
-        'error' => $e->errors(),
+        'message' => $e->errors()
       ], 422);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
-        'message' => 'Error resetting password',
-        'error' => $e->getMessage(),
+        'message' => $e->getMessage()
       ], 500);
     }
   }
