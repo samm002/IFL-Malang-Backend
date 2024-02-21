@@ -71,13 +71,15 @@ Route::prefix('v1')->group(function () {
     Route::get('profile', [ProfileController::class, 'showProfile'])->name('profile.show');
     Route::put('profile/edit', [ProfileController::class, 'updateProfile'])->name('profile.update');
 
+
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
       Route::get('/', [AdminController::class, 'index']);
       Route::apiResource('role', RoleController::class);
       Route::apiResource('role_user', Role_UserController::class);
+      Route::delete('profile/delete/{user_id}', [ProfileController::class, 'deleteProfile'])->name('profile.delete');
       Route::put('role_user/user_id/{user}/update', [Role_UserController::class, 'updateByUserId']);
       Route::put('role_user/pivot_id/{role_user}/update', [Role_UserController::class, 'updateByPivotId']);
-      Route::get('role_user/pivot_id/{role_user}', [Role_UserController::class, 'showById']);
+      Route::get('role_user/pivot_id/{role_user}', [Role_UserController::class, 'showByPivotID']);
       Route::get('role_user/user_id/{user}', [Role_UserController::class, 'showByUserId']);
       Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
     });
