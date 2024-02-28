@@ -14,6 +14,8 @@ use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Blog\CategoriesController;
+use App\Http\Controllers\Blog\BlogInventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +81,11 @@ Route::prefix('v1')->group(function () {
       Route::get('role_user/user_id/{user}', [Role_UserController::class, 'showByUserId']);
       Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
     });
+
+    Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter'], function () {
+      Route::get('/blog', [BlogInventoryController::class, 'getBlogs']);
+      Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
+    });
   });
 
   Route::prefix('user')->group(function () {
@@ -88,3 +95,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
   });
 });
+
+Route::get('/comment', [CommentController::class, 'getComments'])->name('get.comments');
+Route::post('/addcomment', [CommentController::class, 'addComment'])->name('add.comment');
+
+Route::get('/categories', [CategoriesController::class, 'getCategories']);
+Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
+
