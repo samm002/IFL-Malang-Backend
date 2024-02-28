@@ -15,6 +15,7 @@ use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Blog\CategoriesController;
+use App\Http\Controllers\Blog\CommentController;
 use App\Http\Controllers\Blog\BlogInventoryController;
 
 /*
@@ -101,4 +102,3 @@ Route::post('/addcomment', [CommentController::class, 'addComment'])->name('add.
 
 Route::get('/categories', [CategoriesController::class, 'getCategories']);
 Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
-

@@ -42,28 +42,31 @@ class BlogInventoryController extends Controller
     {
         try {
             $request->validate([
-              'author' => 'string|required',
+              'author' => 'string|required', // id author
               'title' => 'string|required',
               'content' => 'string|required',
-              'like' => 'integer',
-              'categories' => 'string|required',
-              'comments' => 'string|nullable',
+              'like' => 'integer|nullable',
+              'categories' => 'string|required', // id category
+              'comments' => 'string|nullable', // id comment
               'image' => 'string|nullable',
             ]);
       
             $blog = new Blog;
             
             $userId = auth()->user()->id;
+
             $blog->author = $userId;
             $blog->title = $request->input('title');
             $blog->content = $request->input('content');
             $blog->like = $request->input('like');
             $categories = $request->input('categories');
-            $blog->categories()->attach($categories);
+            $blog->categories = $categories;
             $blog->comments = $request->input('comments');
             $blog->image = $request->input('image');
-      
+            
             $blog->save();
+            
+            $blog->categories()->attach($categories);
       
             return response()->json([
               'status' => 'success',

@@ -38,7 +38,7 @@ class Blog extends Model
 
     public function comments()
     {
-        return $this->belongsTo(Comment::class, 'comment');
+        return $this->hasMany(Comment::class, 'comment');
     }
 
 }

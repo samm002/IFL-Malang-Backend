@@ -38,7 +38,6 @@ return new class extends Migration
             ->references('id')
             ->on('comment')
             ->onDelete('cascade');
-
         });
     }
 
