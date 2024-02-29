@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Blog;
 
 use App\Models\Blog\Blog;
+use App\Models\Blog\Like;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -113,4 +114,17 @@ class BlogInventoryController extends Controller
         //
     }
 
+    public function like(Request $request, Blog $blog)
+    {
+        $user = $request->user();
+        
+        if (!$user->likes()->where('blog_id', $blog->id)->exists()) {
+            $like = new Like();
+            $like->user_id = $user->id;
+            $like->blog_id = $blog->id;
+            $like->save();
+        }
+
+        return response()->json(['message' => 'Liked successfully']);
+    }
 }

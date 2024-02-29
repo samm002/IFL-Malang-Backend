@@ -102,3 +102,5 @@ Route::post('/addcomment', [CommentController::class, 'addComment'])->name('add.
 Route::get('/categories', [CategoriesController::class, 'getCategories']);
 Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
 
+Route::post('/like', [BlogInventoryController::class, 'like']);
+

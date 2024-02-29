@@ -41,4 +41,9 @@ class Blog extends Model
         return $this->belongsTo(Comment::class, 'comment');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
 }

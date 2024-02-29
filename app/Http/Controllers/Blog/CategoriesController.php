@@ -50,7 +50,7 @@ class CategoriesController extends Controller
             $categories = new Categories;
             
             $categories->categories = $request->input('categories');
-            $categories->qty = $request->input('qqty');
+            $categories->qty = $request->input('qty');
       
             $categories->save();
       
