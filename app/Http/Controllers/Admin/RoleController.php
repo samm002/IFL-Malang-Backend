@@ -60,7 +60,7 @@ class RoleController extends Controller
   {
     try {
       $request->validate([
-        'name' => 'string|required',
+        'name' => 'string|required|unique:roles',
         'description' => 'string|nullable',
       ]);
 
@@ -91,9 +91,10 @@ class RoleController extends Controller
    * @param  \App\Models\Role  $role
    * @return \Illuminate\Http\Response
    */
-  public function show(Role $role)
+  public function show(string $id)
   {
     try {
+      $role = Role::find($id);
       if (!$role) {
         return response()->json([
           'status' => 'error',
@@ -134,25 +135,27 @@ class RoleController extends Controller
    * @param  \App\Models\Role  $role
    * @return \Illuminate\Http\Response
    */
-  public function update(Request $request, Role $role)
+  public function update(Request $request, string $id)
   {
     try {
       $request->validate([
-        'name' => 'string|required',
+        'name' => 'string|nullable|unique:roles',
         'description' => 'string|nullable',
       ]);
+
+      $role = Role::find($id);
 
       if (!$role) {
         return response()->json([
           'status' => 'error',
           'message' => 'Role not found with the given ID',
-          'error' => 'Not Found',
         ], 404);
       }
 
-      $role->name = $request->input('name');
-      $role->description = $request->input('description');
-      $role->save();
+      $role->update([
+        'name' => $request->input('name') ?? $role->name,
+        'description' => $request->input('description') ?? $role->description,
+      ]);
 
       return response()->json([
         'status' => 'success',
@@ -174,14 +177,14 @@ class RoleController extends Controller
    * @param  \App\Models\Role  $role
    * @return \Illuminate\Http\Response
    */
-  public function destroy(Role $role)
+  public function destroy(string $id)
   {
+    $role = Role::find($id);
     try {
       if (!$role) {
         return response()->json([
           'status' => 'error',
           'message' => 'Role not found with the given ID',
-          'error' => 'Not Found',
         ], 404);
       }
 

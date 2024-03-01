@@ -106,7 +106,7 @@ class ProfileController extends Controller
     }
   }
 
-  public function deleteProfile($user_id)
+  public function deleteProfile(string $user_id)
   {
     try {
       $user = User::where('id', $user_id)->first();
