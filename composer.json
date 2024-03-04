@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.14",
         "laravel/socialite": "^5.10",
         "laravel/tinker": "^2.7",
+        "midtrans/midtrans-php": "^2.5",
         "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {

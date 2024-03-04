@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
       UserSeeder::class,
       CopyWriterSeeder::class,
       ShopManagerSeeder::class,
+      CampaignSeeder::class,
     ]);
   }
 }

@@ -50,7 +50,7 @@ class ProfileController extends Controller
       $user = auth()->user();
 
       if ($request->has('profile_picture')) {
-        $path = public_path("/img/user/profile_picture");
+        $path = public_path("/assets/image/user/profile_picture");
 
         if ($user->profile_picture && $user->profile_picture !== 'default.png') {
           File::delete($path . '/' . $user->profile_picture);
@@ -61,7 +61,7 @@ class ProfileController extends Controller
       }
 
       if ($request->has('background_picture')) {
-        $path = public_path("/img/user/background_picture");
+        $path = public_path("/assets/image/user/background_picture");
 
         if ($user->background_picture && $user->background_picture !== 'default.png') {
           File::delete($path . '/' . $user->background_picture);

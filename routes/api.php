@@ -1,19 +1,22 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\Role_UserController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
+use App\Http\Controllers\Donation\CampaignController;
+use App\Http\Controllers\Donation\DonationController;
+use App\Http\Controllers\Donation\TransactionController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,11 +55,12 @@ Route::prefix('v1')->group(function () {
     Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
     Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
-    // extend session
+    // Extend session
     Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
     
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
+      Route::post('update-password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
@@ -92,4 +96,10 @@ Route::prefix('v1')->group(function () {
       Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
     });
   });
+
+  Route::apiResource('/campaign', CampaignController::class);
+  Route::post('/donation/donate/{campaign_id}', [DonationController::class, 'donate'])->name('donate');
+  Route::delete('/donation/deleteAll', [DonationController::class, 'deleteAll']);
+  Route::apiResource('/donation', DonationController::class);
+  Route::post('/payment-callback', [TransactionController::class, 'paymentCallback'])->name('paymentCallback');
 });
