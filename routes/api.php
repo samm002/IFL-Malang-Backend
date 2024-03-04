@@ -15,6 +15,8 @@ use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Blog\CategoriesController;
+use App\Http\Controllers\Blog\CommentController;
+use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\BlogInventoryController;
 
 /*
@@ -85,6 +87,9 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter'], function () {
       Route::get('/blog', [BlogInventoryController::class, 'getBlogs']);
       Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
+      Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
+      Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
+      Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
     });
   });
 
@@ -102,5 +107,5 @@ Route::post('/addcomment', [CommentController::class, 'addComment'])->name('add.
 Route::get('/categories', [CategoriesController::class, 'getCategories']);
 Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
 
-Route::post('/like', [BlogInventoryController::class, 'like']);
-
+Route::get('/blog/search-by-author/{author}', [BlogInventoryController::class, 'searchByAuthor']);
+Route::get('/blog/search-by-categorie/{categories}', [BlogInventoryController::class, 'searchByCategorie']);

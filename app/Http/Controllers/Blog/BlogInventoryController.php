@@ -43,28 +43,31 @@ class BlogInventoryController extends Controller
     {
         try {
             $request->validate([
-              'author' => 'string|required',
+              'author' => 'string|required', // id author
               'title' => 'string|required',
               'content' => 'string|required',
-              'like' => 'integer',
-              'categories' => 'string|required',
-              'comments' => 'string|nullable',
+              'like' => 'integer|nullable',
+              'categories' => 'string|required', // id category
+              'comments' => 'string|nullable', // id comment
               'image' => 'string|nullable',
             ]);
       
             $blog = new Blog;
             
             $userId = auth()->user()->id;
+
             $blog->author = $userId;
             $blog->title = $request->input('title');
             $blog->content = $request->input('content');
             $blog->like = $request->input('like');
             $categories = $request->input('categories');
-            $blog->categories()->attach($categories);
+            $blog->categories = $categories;
             $blog->comments = $request->input('comments');
             $blog->image = $request->input('image');
-      
+            
             $blog->save();
+            
+            $blog->categories()->attach($categories);
       
             return response()->json([
               'status' => 'success',
@@ -98,9 +101,48 @@ class BlogInventoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function editBlog(Request $request, Blog $blog)
     {
-        //
+      try {
+        $request->validate([
+          'author' => 'string|required', // id author
+          'title' => 'string|required',
+          'content' => 'string|required',
+          'like' => 'integer|nullable',
+          'categories' => 'string|required', // id category
+          'comments' => 'string|nullable', // id comment
+          'image' => 'string|nullable',
+        ]);
+  
+        if (!$blogs) {
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Blog not found with the given ID',
+            'error' => 'Not Found',
+          ], 404);
+        }
+  
+        $blogs->categories = $request->input('categories');
+        $blogs->title = $request->input('title');
+        $blogs->author = $request->input('author');
+        $blogs->content = $request->input('content');
+        $blogs->like = $request->input('like');
+        $blogs->comments = $request->input('comments');
+        $blogs->image = $request->input('image');
+        $blogs->save();
+  
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Blog updated successfully',
+          'data' => $blogs,
+        ], 200);
+      } catch (\Exception $e) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Error updating blog',
+          'error' => $e->getMessage(),
+        ], 500);
+      }
     }
 
     /**
@@ -109,22 +151,62 @@ class BlogInventoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Blog $blog)
     {
-        //
+      try {
+        if (!$blog) {
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Blog not found with the given ID',
+            'error' => 'Not Found',
+          ], 404);
+        }
+  
+        $blog->delete();
+  
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Blog deleted successfully',
+          'data' => $blog,
+        ], 200);
+      } catch (\Exception $e) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Error deleting blog',
+          'error' => $e->getMessage(),
+        ], 500);
+      }
     }
 
-    public function like(Request $request, Blog $blog)
+    public function searchByAuthor(Request $request)
     {
-        $user = $request->user();
-        
-        if (!$user->likes()->where('blog_id', $blog->id)->exists()) {
-            $like = new Like();
-            $like->user_id = $user->id;
-            $like->blog_id = $blog->id;
-            $like->save();
+        $authorId = $request->input('author');
+
+        $blogs = Blog::whereHas('author', function ($query) use ($request) {
+          $query->where('username', 'LIKE', '%' . $request->author . '%');
+        })->get();
+
+        if ($blogs->isEmpty()) {
+          return response()->json(['message' => 'No blogs found for the specified author'], 404);
         }
 
-        return response()->json(['message' => 'Liked successfully']);
+        // Jika blog ditemukan, kembalikan respons dengan data blog
+        return response()->json(['data' => $blogs]);
+    }
+
+    public function searchByCategorie(Request $request)
+    {
+        $categoriesId = $request->input('categories');
+
+        $blogs = Blog::whereHas('categories', function ($query) use ($request) {
+          $query->where('categories', 'LIKE', '%' . $request->categories . '%');
+        })->get();
+
+        if ($blogs->isEmpty()) {
+          return response()->json(['message' => 'No blogs found for the specified categorie'], 404);
+        }
+
+        // Jika blog ditemukan, kembalikan respons dengan data blog
+        return response()->json(['data' => $blogs]);
     }
 }
