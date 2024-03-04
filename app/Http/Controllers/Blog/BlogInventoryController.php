@@ -98,7 +98,7 @@ class BlogInventoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Blog\Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function editBlog(Request $request, Blog $blog)
@@ -148,7 +148,7 @@ class BlogInventoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Blog\Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function destroy(Blog $blog)
