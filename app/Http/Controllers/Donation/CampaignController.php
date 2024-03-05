@@ -65,7 +65,6 @@ class CampaignController extends Controller
         if ($request->has('photo')) {
           $path = public_path("assets/image/campaign/". $campaign->type . "/");
           $campaign_name = str_replace(' ', '_', $campaign->name);
-          $timestamp = date('d-m-Y_H-i-s');
           $campaign_photo = $campaign_name . '.' . $request->photo->extension();
           $request->photo->move($path, $campaign_photo);
           $campaign->photo = $campaign_photo;
@@ -134,7 +133,7 @@ class CampaignController extends Controller
       }
       try {
         $request->validate([
-          'name' => ['nullable', 'string', 'unique:campaigns'],
+          'name' => ['nullable', 'string', 'unique:campaigns,name,' . $campaign->id],
           'type' => ['nullable', 'string', 'in:kemanusiaan,kesehatan,pendidikan,tanggap bencana'],
           'current_donation' => ['nullable', 'numeric', 'min:0'],
           'target_donation' => ['nullable', 'numeric', 'min:0'],
@@ -197,7 +196,8 @@ class CampaignController extends Controller
       if (!$campaign) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Campaign not found with the given ID',
+          'message' => 'Campaign delete failed',
+          'detail' => 'Campaign not found with the given ID',
         ], 404);
       }
 
