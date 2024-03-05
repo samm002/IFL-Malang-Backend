@@ -17,21 +17,18 @@ class UserSeeder extends Seeder
    */
   public function run()
   {
-    $userSeed = User::factory()->create([
+    $role = Role::where('name', 'user')->first();
+    User::factory()->create([
       'username' => 'user',
       'email' => 'user@gmail.com',
       'password' => bcrypt('user0123'),
       'email_verified_at' => now(),
       'remember_token' => Str::random(10),
+      'role_id' => $role->id,
     ]);
 
-    $role = Role::where('name', 'user')->first();
-    $userSeed->roles()->attach($role, ['created_at' => now(), 'updated_at' => now()]);
-    
-    $users = User::factory(2)->create();
-
-    foreach ($users as $user) {
-      $user->roles()->attach($role, ['created_at' => now(), 'updated_at' => now()]);
-    }
+    User::factory(2)->create([
+      'role_id' => $role->id,
+    ]);
   }
 }

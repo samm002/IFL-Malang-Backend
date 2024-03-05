@@ -17,15 +17,14 @@ class AdminSeeder extends Seeder
    */
   public function run()
   {
-    $user = User::factory()->create([
+    $role = Role::where('name', 'admin')->first();
+    $admin = User::factory()->create([
       'username' => 'admin',
       'email' => 'iflchaptermalang@gmail.com',
       'password' => bcrypt('IflMalang0123'),
       'email_verified_at' => now(),
       'remember_token' => Str::random(10),
+      'role_id' => $role->id,
     ]);
-
-    $role = Role::where('name', 'admin')->first();
-    $user->roles()->attach($role, ['created_at' => now(), 'updated_at' => now()]);
   }
 }

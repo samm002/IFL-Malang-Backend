@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use App\Models\Role_User;
 
 
 class ProfileController extends Controller
@@ -13,10 +15,12 @@ class ProfileController extends Controller
   {
     try {
       $user = auth()->user();
-      $role = $user->roles()->pluck('name')->first();
+
+      $hasRole = $user->role->name;
+      unset($user->role_id, $user->role);
+      $user->role = $hasRole;
 
       // $user['pass'] = auth()->user()->password;
-      $user['role'] = $role;
 
       return response()->json([
         'status' => 'success',
@@ -37,7 +41,7 @@ class ProfileController extends Controller
     try {
       $request->validate([
         'name' => 'string|nullable',
-        'username' => 'string|nullable|unique:users',
+        'username' => 'string|nullable|unique:users,id',
         'address' => 'string|nullable',
         'phone_number' => 'numeric|nullable',
         'about_me' => 'string|nullable',
@@ -47,25 +51,27 @@ class ProfileController extends Controller
 
       $user = auth()->user();
 
+      $timestamp = date('d-m-Y_H-i-s');
+
       if ($request->has('profile_picture')) {
-        $path = public_path("/img/user/profile_picture");
+        $path = public_path("/assets/image/user/profile_picture");
 
         if ($user->profile_picture && $user->profile_picture !== 'default.png') {
           File::delete($path . '/' . $user->profile_picture);
         }
 
-        $profilePicture = $user->username . "-profile-" . time() . '.' . $request->profile_picture->extension();
+        $profilePicture = $user->username . "-profile-" . $timestamp . '.' . $request->profile_picture->extension();
         $request->profile_picture->move($path, $profilePicture);
       }
 
       if ($request->has('background_picture')) {
-        $path = public_path("/img/user/background_picture");
+        $path = public_path("/assets/image/user/background_picture");
 
         if ($user->background_picture && $user->background_picture !== 'default.png') {
           File::delete($path . '/' . $user->background_picture);
         }
 
-        $backgroundPicture = $user->username . "-background-" . time() . '.' . $request->background_picture->extension();
+        $backgroundPicture = $user->username . "-background-" . $timestamp . '.' . $request->background_picture->extension();
         $request->background_picture->move($path, $backgroundPicture);
       }
 

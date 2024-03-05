@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use App\Models\Role;
 use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
 use App\Traits\TokenResponse;
@@ -27,15 +28,24 @@ class GoogleController extends Controller
       $googleUser = Socialite::driver('google')->stateless()->user();
 
       $user = User::where('email', $googleUser->getEmail())->first();
-
+      
       if (!$user) {
+        $user_name = str_replace(' ', '_', $googleUser->getName());
+  
+        $path = public_path("assets/image/user/profile_picture");
+        $timestamp = date('d-m-Y_H-i-s');
+        $profilePicture = $user_name . "-profile-" . $timestamp . '.' . '.jpg';
+        file_put_contents($path . "/" . $profilePicture, file_get_contents($googleUser->getAvatar()));
+
         $user = User::create([
-          'username' => $googleUser->getName(),
+          'name' => $googleUser->getName(),
+          'username' => $googleUser->getNickname() ?? $user_name,
           'email' => $googleUser->getEmail(),
           'google_id' => $googleUser->getId(),
-          'profile_picture'=> $googleUser->getAvatar(),
+          'profile_picture'=> $profilePicture,
           'password' => Hash::make(12345678),
           'email_verified_at' => now(),
+          'role_id' => Role::where('name', 'user')->first()->id,
         ]);
       }
 
