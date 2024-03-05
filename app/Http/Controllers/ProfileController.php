@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
-use App\Models\User;
-use App\Models\Role_User;
-
+use App\Models\Role;
 
 class ProfileController extends Controller
 {
@@ -15,10 +13,11 @@ class ProfileController extends Controller
   {
     try {
       $user = auth()->user();
-      $role = $user->roles()->pluck('name')->first();
+
+      $role = Role::find($user->role_id);
+      $user->role = $role->name;
 
       // $user['pass'] = auth()->user()->password;
-      $user['role'] = $role;
 
       return response()->json([
         'status' => 'success',
@@ -39,7 +38,7 @@ class ProfileController extends Controller
     try {
       $request->validate([
         'name' => 'string|nullable',
-        'username' => 'string|nullable|unique:users',
+        'username' => 'string|nullable|unique:users,id',
         'address' => 'string|nullable',
         'phone_number' => 'numeric|nullable',
         'about_me' => 'string|nullable',
@@ -49,6 +48,8 @@ class ProfileController extends Controller
 
       $user = auth()->user();
 
+      $timestamp = date('d-m-Y_H-i-s');
+
       if ($request->has('profile_picture')) {
         $path = public_path("/assets/image/user/profile_picture");
 
@@ -56,7 +57,7 @@ class ProfileController extends Controller
           File::delete($path . '/' . $user->profile_picture);
         }
 
-        $profilePicture = $user->username . "-profile-" . time() . '.' . $request->profile_picture->extension();
+        $profilePicture = $user->username . "-profile-" . $timestamp . '.' . $request->profile_picture->extension();
         $request->profile_picture->move($path, $profilePicture);
       }
 
@@ -67,7 +68,7 @@ class ProfileController extends Controller
           File::delete($path . '/' . $user->background_picture);
         }
 
-        $backgroundPicture = $user->username . "-background-" . time() . '.' . $request->background_picture->extension();
+        $backgroundPicture = $user->username . "-background-" . $timestamp . '.' . $request->background_picture->extension();
         $request->background_picture->move($path, $backgroundPicture);
       }
 
@@ -101,43 +102,6 @@ class ProfileController extends Controller
       return response()->json([
         'status' => 'error',
         'message' => 'Update profile failed',
-        'error' => $e->getMessage(),
-      ], 500);
-    }
-  }
-
-  public function deleteProfile(string $user_id)
-  {
-    try {
-      $user = User::where('id', $user_id)->first();
-      if (!$user) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'user not found with the given id',
-        ], 404);
-      }
-
-      $role_user = Role_User::where('user_id', $user->id)->first();
-
-      if (!$role_user) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Role_user not found with the given id',
-        ], 404);
-      }
-
-      $role_user->delete();
-      $user->delete();
-
-      return response()->json([
-        'status' => 'success',
-        'message' => 'User deleted successfully',
-        'data' => $user,
-      ], 200);
-    } catch (\Exception $e) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Error deleting user',
         'error' => $e->getMessage(),
       ], 500);
     }
