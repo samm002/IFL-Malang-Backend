@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\Role_UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -13,22 +12,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+use App\Http\Controllers\Admin\UserController;
 
 /*
   NOTES :
@@ -37,26 +21,19 @@ use App\Http\Controllers\UserController;
   - middleware 'verified' untuk route yang memerlukan user sudah verifikasi email
 */
 
-// Routh untuk Auth
 Route::prefix('v1')->group(function () {
   Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register');
     Route::post('login', [LoginController::class, 'login'])->name('login');
-
-    // Verify Email
-    // Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
     Route::post('email/check', [EmailVerificationController::class, 'checkEmailVerified'])->name('verification.check');
-
-    // Login Register With Google
     Route::get('google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google.login');
     Route::get('google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
-
-    // extend session
     Route::get('refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
     
     Route::middleware(['jwt.verify', 'verified'])->group(function () {
       Route::get('check-token-duration', [LoginController::class, 'checkTokenDuration'])->name('check.token.duration');
+      Route::post('update-password', [UpdatePasswordController::class, 'updatePassword'])->name('update.password');
       Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     });
 
@@ -76,20 +53,16 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
       Route::get('/', [AdminController::class, 'index']);
       Route::apiResource('role', RoleController::class);
-      Route::apiResource('role_user', Role_UserController::class);
-      Route::delete('profile/delete/{user_id}', [ProfileController::class, 'deleteProfile'])->name('profile.delete');
-      Route::put('role_user/user_id/{user}/update', [Role_UserController::class, 'updateByUserId']);
-      Route::put('role_user/pivot_id/{role_user}/update', [Role_UserController::class, 'updateByPivotId']);
-      Route::get('role_user/pivot_id/{role_user}', [Role_UserController::class, 'showByPivotID']);
-      Route::get('role_user/user_id/{user}', [Role_UserController::class, 'showByUserId']);
-      Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
-    });
-
-    Route::group(['prefix' => 'user', 'middleware' => 'role:admin'], function () {
-      Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
-      Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
-      Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
-      Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+      
+      Route::group(['prefix' => 'user'], function () {
+        Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
+        Route::post('/', [UserController::class, 'createUser'])->name('create.user');
+        Route::put('/{id}', [UserController::class, 'updateUser'])->name('update.user');
+        Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
+        Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
+        Route::get('/email/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+        Route::get('/id/{id}', [UserController::class, 'getUserByid'])->name('get.user.by.id');
+      });
     });
   });
 });

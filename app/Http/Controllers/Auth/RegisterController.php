@@ -41,23 +41,19 @@ class RegisterController extends Controller
         'username' => $request->input("username"),
         'email' => $request->input("email"),
         'password' => Hash::make($request->input("password")),
+        'role_id' => Role::where('name', 'user')->first()->id,
       ]);
 
-      $role = Role::where('name', 'user')->first();
-
-      $user->roles()->attach($role);
-
-      $hasRole = $user->roles()->pluck('name')->first();
+      $hasRole = $user->role->name;
+      unset($user->role);
+      $user->role = $hasRole;
 
       SendActivationEmail::dispatch($user);
-
-      $data["user"] = $user;
-      $data["user"]["role"] = $hasRole;
 
       return response()->json([
         'status' => 'success',
         'message' => 'User registered successfully, please check your email for verification.',
-        'data' => $data,
+        'data' => $user,
       ], 201);
     } catch (\Exception $e) {
       return response()->json([

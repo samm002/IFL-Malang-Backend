@@ -56,6 +56,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     "background_picture",
     'about_me',
     'email_verified_at',
+    'role_id',
   ];
 
   /**
@@ -77,13 +78,14 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     'email_verified_at' => 'datetime',
   ];
 
-  public function roles()
+  public function role()
   {
-    return $this->belongsToMany(Role::class)->using(Role_User::class)->withTimestamps();
+    return $this->belongsTo(Role::class);
+  //   return $this->belongsToMany(Role::class)->using(Role_User::class)->withTimestamps();
   }
 
   public function hasRole($role)
   {
-    return $this->roles->contains('name', $role);
+    return $this->role->name === $role;
   }
 }
