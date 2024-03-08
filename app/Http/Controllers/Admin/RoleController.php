@@ -15,9 +15,8 @@ class RoleController extends Controller
    */
   public function index()
   {
+    $roles = Role::all();
     try {
-      $roles = Role::all();
-
       if ($roles->isEmpty()) {
         return response()->json([
           'status' => 'success',
@@ -93,8 +92,8 @@ class RoleController extends Controller
    */
   public function show(string $id)
   {
+    $role = Role::find($id);
     try {
-      $role = Role::find($id);
       if (!$role) {
         return response()->json([
           'status' => 'error',
@@ -105,13 +104,13 @@ class RoleController extends Controller
 
       return response()->json([
         'status' => 'success',
-        'message' => 'Role details retrieved successfully',
+        'message' => 'Get role by id success',
         'data' => $role,
       ], 200);
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
-        'message' => 'Error retrieving role details',
+        'message' => 'Get role by id failed',
         'error' => $e->getMessage(),
       ], 500);
     }
@@ -137,20 +136,18 @@ class RoleController extends Controller
    */
   public function update(Request $request, string $id)
   {
+    $role = Role::find($id);
+    if (!$role) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Role not found with the given ID',
+      ], 404);
+    }
     try {
       $request->validate([
         'name' => 'string|nullable|unique:roles',
         'description' => 'string|nullable',
       ]);
-
-      $role = Role::find($id);
-
-      if (!$role) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Role not found with the given ID',
-        ], 404);
-      }
 
       $role->update([
         'name' => $request->input('name') ?? $role->name,

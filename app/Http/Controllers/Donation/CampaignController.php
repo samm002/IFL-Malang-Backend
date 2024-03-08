@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Donation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Models\Campaign;
 
 class CampaignController extends Controller
@@ -44,33 +47,46 @@ class CampaignController extends Controller
      */
     public function store(Request $request)
     {
+      $request->validate([
+        'title' => ['required', 'string', 'unique:campaigns'],
+        'user_id' => ['required', 'uuid', 'exist:users'],
+        'short_description' => ['required', 'string'],
+        'body' => ['required', 'string'],
+        'view_count' => ['nullable', 'integer', 'min:0'],
+        'status' => ['required', 'in:active,closed,pending'],
+        'current_donation' => ['nullable', 'numeric', 'min:0'],
+        'target_donation' => ['required', 'numeric', 'min:0'],
+        'publish_date' => ['required', 'date'],
+        'end_date' => ['required', 'date', 'after_or_equal:publish_date'],
+        'note' => ['nullable', 'string'],
+        'receiver' => ['required', 'string'],
+        'image' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:16384'],
+        'categories' => ['required'],
+      ]);
       try {
-        $request->validate([
-          'name' => ['required', 'string', 'unique:campaigns'],
-          'type' => ['required', 'string', 'in:kemanusiaan,kesehatan,pendidikan,tanggap bencana'],
-          'current_donation' => ['nullable', 'numeric', 'min:0'],
-          'target_donation' => ['required', 'numeric', 'min:0'],
-          'start_date' => ['required', 'date'],
-          'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-          'description' => ['nullable', 'string'],
-          'photo' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:16384'],
-        ]);
-  
+        DB::beginTransaction();
+
         $data = $request->all();
         $campaign = new Campaign;
         $campaign->fill($data);
         
         $campaign->save();
-        
-        if ($request->has('photo')) {
-          $path = public_path("assets/image/campaign/". $campaign->type . "/");
-          $campaign_name = str_replace(' ', '_', $campaign->name);
-          $campaign_photo = $campaign_name . '.' . $request->photo->extension();
-          $request->photo->move($path, $campaign_photo);
-          $campaign->photo = $campaign_photo;
+
+        if ($request->has('image')) {
+          $campaign_name = Str::slug($campaign->title);
+          $campaign_image = $request->image->storeAs(
+            'assets/image/campaign', $campaign_name . '.' . $request->image->extension() 
+          );
+          $campaign->image = basename($campaign_image);
           $campaign->save();
         }
-        
+
+        if ($request->has('categories')) {
+          $campaign->categories()->attach($request->categories);
+        }
+
+        DB::commit();
+
         return response()->json([
           'status' => 'success',
           'message' => 'Create campaign success',
@@ -131,40 +147,63 @@ class CampaignController extends Controller
           'message' => 'Campaign not found with the given ID',
         ], 404);
       }
-      try {
-        $request->validate([
-          'name' => ['nullable', 'string', 'unique:campaigns,name,' . $campaign->id],
-          'type' => ['nullable', 'string', 'in:kemanusiaan,kesehatan,pendidikan,tanggap bencana'],
-          'current_donation' => ['nullable', 'numeric', 'min:0'],
-          'target_donation' => ['nullable', 'numeric', 'min:0'],
-          'start_date' => ['nullable', 'date'],
-          'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-          'description' => ['nullable', 'string'],
-          'photo' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:16384'],
-        ]);
 
-        if ($request->has('photo')) {
-          $path = public_path("assets/img/campaign");
+      $request->validate([
+        'title' => ['nullable', 'string', 'unique:campaigns,name,' . $campaign->id],
+        'short_description' => ['nullable', 'string'],
+        'body' => ['nullable', 'string'],
+        'view_count' => ['nullable', 'integer', 'min:0'],
+        'status' => ['nullable', 'in:active,closed,pending'],
+        'current_donation' => ['nullable', 'numeric', 'min:0'],
+        'target_donation' => ['nullable', 'numeric', 'min:0'],
+        'publish_date' => ['nullable', 'date'],
+        'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+        'note' => ['nullable', 'string'],
+        'receiver' => ['nullable', 'string'],
+        'image' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:16384'],
+        'categories' => ['nullable', 'exist:categories'],
+      ]);
+
+      try {
+        if ($request->hasFile('image')) {
+          $path = public_path("assets/image/campaign");
+          if ($campaign->image) {
+            $old_image = $path . "/" . $campaign->image;
+            Storage::delete($old_image);
+          }
+          $campaign_name = Str::slug($campaign->title);
+          $campaign_image = $campaign_name . '.' . $request->image->extension();
+          $request->file('image')->storeAs(
+            '/assets/image/campaign', $campaign_name . '.' . $request->image->extension(), 'local'
+          );
+          $campaign->image = $campaign_image;
+          $campaign->save();
+      }
+        if ($request->has('image')) {
+          $path = public_path("assets/image/campaign");
   
-          if ($campaign->photo) {
-            File::delete($path . '/' . $campaign->photo);
+          if ($campaign->image) {
+            File::delete($path . '/' . $campaign->image);
           }
   
-          $campaign_name = str_replace(' ', '_', $campaign->name);
-          $timestamp = date('d-m-Y_H-i-s');
-          $campaign_photo = $campaign_name . '-'. $campaign->id . '-' . $timestamp . '.' . $request->photo->extension();
-          $request->photo->move($path, $campaign_photo);
+          $campaign_name = Str::slug($campaign->title);
+          $campaign_image = $campaign_name . '.' . $request->image->extension();
+          $request->image->move($path, $campaign_image);
         }
 
         $campaign->update([
-          'name' => $request->input('name') ?? $campaign->name,
-          'type' => $request->input('type') ?? $campaign->type,
+          'title' => $request->input('title') ?? $campaign->title,
+          'short_description' => $request->input('short_description') ?? $campaign->short_description,
+          'body' => $request->input('body') ?? $campaign->short_description,
+          'view_count' => $request->input('view_count') ?? $campaign->view_count,
+          'status' => $request->input('status') ?? $campaign->status,
           'current_donation' => $request->input('current_donation') ?? $campaign->current_donation,
           'target_donation' => $request->input('target_donation') ?? $campaign->target_donation,
           'start_date' => $request->input('start_date') ?? $campaign->start_date,
           'end_date' => $request->input('end_date') ?? $campaign->end_date,
-          'description' => $request->input('description') ?? $campaign->description,
-          'photo' => $campaign_photo ?? $campaign->photo,
+          'note' => $request->input('note') ?? $campaign->note,
+          'receiver' => $request->input('receiver') ?? $campaign->receiver,
+          'image' => $campaign_image ?? $campaign->image,
         ]);
         
         return response()->json([
@@ -202,6 +241,13 @@ class CampaignController extends Controller
       }
 
       try {
+        if ($campaign->image) {
+          $path = public_path("assets/image/campaign");
+          File::delete($path . '/' . $campaign->image);
+        }
+
+        $campaign->categories()->detach();
+
         $campaign->delete();
   
         return response()->json([

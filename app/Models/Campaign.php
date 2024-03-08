@@ -11,15 +11,24 @@ class Campaign extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-      'name',
-      'type',
+      'title',
+      'short_description',
+      'body',
+      'view_count',
+      'status',
       'current_donation',
       'target_donation',
-      'start_date',
+      'publish_date',
       'end_date',
-      'description',
-      'photo',
+      'note',
+      'receiver',
+      'image',
     ];
+
+    public function categories()
+    {
+      return $this->belongsToMany(Category::class)->using(Campaign_Category::class)->withTimestamps();
+    }
 
     public function donations()
     {

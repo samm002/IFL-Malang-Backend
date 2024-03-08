@@ -18,25 +18,25 @@ class RoleSeeder extends Seeder
       // Create a 'user' role
       Role::factory()->create([
           'name' => 'user',
-          'description' => 'This is the user role',
+          'description' => 'This is user role',
       ]);
 
       // Create an 'admin' role
       Role::factory()->create([
           'name' => 'admin',
-          'description' => 'This is the admin role',
+          'description' => 'This is admin role',
       ]);
 
       // Create a 'copywriter' role
       Role::factory()->create([
           'name' => 'copywriter',
-          'description' => 'This is the copywriter role',
+          'description' => 'This is copywriter role',
       ]);
 
       // Create a 'shop manager' role
       Role::factory()->create([
-          'name' => 'shop manager',
-          'description' => 'This is the shop manager role',
+          'name' => 'bismar',
+          'description' => 'This is bismar role',
       ]);
   }
 }

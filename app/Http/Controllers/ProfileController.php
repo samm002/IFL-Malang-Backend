@@ -39,8 +39,10 @@ class ProfileController extends Controller
       $request->validate([
         'name' => 'string|nullable',
         'username' => 'string|nullable|unique:users,id',
-        'address' => 'string|nullable',
         'phone_number' => 'numeric|nullable',
+        'gender' => 'string|nullable|in:male,female,not specified',
+        'birth_date' => 'date|nullable',
+        'address' => 'string|nullable',
         'about_me' => 'string|nullable',
         'profile_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
         'background_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',

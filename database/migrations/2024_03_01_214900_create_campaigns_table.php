@@ -15,14 +15,18 @@ return new class extends Migration
     {
       Schema::create('campaigns', function (Blueprint $table) {
         $table->uuid('id')->primary();
-        $table->string('name')->unique();
-        $table->enum('type', ['kemanusiaan', 'kesehatan', 'pendidikan', 'tanggap bencana']);
+        $table->string('title')->unique();
+        $table->string('short_description');
+        $table->longText('body');
+        $table->integer('view_count')->default(0);
+        $table->enum('status', ['active', 'closed', 'pending'])->default('pending');
         $table->decimal('current_donation', 12, 2)->default(0);
         $table->decimal('target_donation', 12, 2);
-        $table->date('start_date');
-        $table->date('end_date');
-        $table->text('description')->nullable();
-        $table->string('photo')->nullable();
+        $table->dateTime('publish_date')->default(now());
+        $table->dateTime('end_date');
+        $table->text('note')->nullable();
+        $table->string('receiver');
+        $table->string('image')->nullable();
         $table->timestamps();
       });
     }

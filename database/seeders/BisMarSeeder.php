@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Role;
 
-class ShopManagerSeeder extends Seeder
+class BisMarSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,12 +17,12 @@ class ShopManagerSeeder extends Seeder
      */
     public function run()
     {
-      $role = Role::where('name', 'shop manager')->first();
+      $role = Role::where('name', 'bismar')->first();
 
       User::factory()->create([
-        'username' => 'shopManager',
-        'email' => 'shopManager@gmail.com',
-        'password' => bcrypt('shopManager0123'),
+        'username' => 'bisMar',
+        'email' => 'bisMar@gmail.com',
+        'password' => bcrypt('bisMar0123'),
         'email_verified_at' => now(),
         'remember_token' => Str::random(10),
         'role_id' => $role->id,

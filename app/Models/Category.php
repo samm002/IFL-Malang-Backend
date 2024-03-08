@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class Role extends Model
+class Category extends Model
 {
     use HasFactory, HasUuids;
 
@@ -15,8 +15,8 @@ class Role extends Model
       'description',
     ];
 
-    public function users() 
+    public function categories()
     {
-      return $this->belongsToMany(User::class);
+      return $this->belongsToMany(Category::class);
     }
 }

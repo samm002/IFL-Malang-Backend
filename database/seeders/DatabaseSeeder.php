@@ -19,8 +19,9 @@ class DatabaseSeeder extends Seeder
       AdminSeeder::class,
       UserSeeder::class,
       CopyWriterSeeder::class,
-      ShopManagerSeeder::class,
-      CampaignSeeder::class,
+      BisMarSeeder::class,
+      // CampaignSeeder::class,
+      CategorySeeder::class,
     ]);
   }
 }

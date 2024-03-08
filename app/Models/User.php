@@ -46,15 +46,17 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
    */
   protected $fillable = [
     'name',
-    'email',
-    'password',
-    'google_id',
     'username',
-    'address',
+    'email',
+    'google_id',
+    'password',
     'phone_number',
+    'gender',
+    'birth_date',
+    'address',
+    'about_me',
     'profile_picture',
     "background_picture",
-    'about_me',
     'email_verified_at',
     'role_id',
   ];
@@ -81,7 +83,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
   public function role()
   {
     return $this->belongsTo(Role::class);
-  //   return $this->belongsToMany(Role::class)->using(Role_User::class)->withTimestamps();
   }
 
   public function hasRole($role)

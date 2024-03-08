@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\Donation\CampaignController;
+use App\Http\Controllers\Donation\CategoryController;
 use App\Http\Controllers\Donation\DonationController;
 use App\Http\Controllers\Donation\TransactionController;
 use App\Http\Controllers\NoticeController;
@@ -61,6 +62,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
         Route::post('/', [UserController::class, 'createUser'])->name('create.user');
         Route::put('/{id}', [UserController::class, 'updateUser'])->name('update.user');
+        Route::delete('/{id}', [UserController::class, 'deleteUser'])->name('delete.user');
         Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
         Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
         Route::get('/email/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
@@ -69,6 +71,7 @@ Route::prefix('v1')->group(function () {
     });
   });
 
+  Route::apiResource('/category', CategoryController::class);
   Route::apiResource('/campaign', CampaignController::class);
   Route::post('/donation/donate/{campaign_id}', [DonationController::class, 'donate'])->name('donate');
   Route::delete('/donation/deleteAll', [DonationController::class, 'deleteAll']);

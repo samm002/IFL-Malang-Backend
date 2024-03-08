@@ -140,27 +140,24 @@ class UserController extends Controller
       $request->validate([
         'name' => 'string|nullable',
         'username' => 'string|nullable|unique:users',
-        'address' => 'string|nullable',
+        'email' => 'required|string|email|max:255|unique:users',
         'phone_number' => 'numeric|nullable',
+        'gender' => 'string|nullable|in:male,female,not specified',
+        'birth_date' => 'date|nullable',
+        'address' => 'string|nullable',
         'about_me' => 'string|nullable',
         'profile_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
         'background_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
         'role_id' => 'uuid|nullable|exists:roles,id',
       ]);
-
+      
       $inputRole = $request->input('role_id');
       
-      $role = Role::find($inputRole);
-      
-      if (!$role) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'role id : ' . (string) $inputRole . ' not found',
-        ], 404);
-      }
-      
+      $user_role = Role::where('name', 'user')->first()->id;
+
       $data = $request->all();
       $data['password'] = Hash::make($request->input("password"));
+      $data['role_id'] = $inputRole ?? $user_role;
       $data['email_verified_at'] = now();
 
       $user = new User;
@@ -186,6 +183,7 @@ class UserController extends Controller
         $user->save();
       }
 
+      $role = Role::find($user->role_id);
       $user->role = $role->name;
 
       return response()->json([
@@ -216,9 +214,11 @@ class UserController extends Controller
       $request->validate([
         'name' => 'string|nullable',
         'username' => 'string|nullable|unique:users,id',
-        'password' => ['required', 'min:8', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/', 'confirmed'],
-        'address' => 'string|nullable',
+        'password' => ['nullable', 'min:8', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[\W]).*$/', 'confirmed'],
         'phone_number' => 'numeric|nullable',
+        'gender' => 'string|nullable|in:male,female,not specified',
+        'birth_date' => 'date|nullable',
+        'address' => 'string|nullable',
         'about_me' => 'string|nullable',
         'profile_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
         'background_picture' => 'mimes:jpg,jpeg,png,webp|max:16384|nullable',
@@ -265,8 +265,10 @@ class UserController extends Controller
       $user->update([
         'name' => $request->input('name') ?? $user->name,
         'username' => $request->input('username') ?? $user->username,
-        'address' => $request->input('address') ?? $user->address,
         'phone_number' => $request->input('phone_number') ?? $user->phone_number,
+        'gender' => $request->input('gender') ?? $user->gender,
+        'birth_date' => $request->input('birth_date') ?? $user->birth_date,
+        'address' => $request->input('address') ?? $user->address,
         'about_me' => $request->input('about_me') ?? $user->about_me,
         'profile_picture' => $profilePicture ?? $user->profile_picture,
         'background_picture' => $backgroundPicture ?? $user->background_picture,
@@ -284,13 +286,13 @@ class UserController extends Controller
     } catch (\Exception $e) {
       return response()->json([
         'status' => 'error',
-        'message' => 'Create user failed',
+        'message' => 'Update user failed',
         'error' => $e->getMessage(),
       ], 500);
     }
   }
 
-  public function deleteProfile(string $id)
+  public function deleteUser(string $id)
   {
     $user = User::find($id);
       if (!$user) {
@@ -306,7 +308,7 @@ class UserController extends Controller
 
       return response()->json([
         'status' => 'success',
-        'message' => 'User deleted successfully',
+        'message' => 'User deleted success',
         'data' => $user,
       ], 200);
     } catch (\Exception $e) {

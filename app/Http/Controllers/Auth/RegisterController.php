@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
@@ -37,6 +38,7 @@ class RegisterController extends Controller
     }
 
     try {
+      DB::beginTransaction();
       $user = User::create([
         'username' => $request->input("username"),
         'email' => $request->input("email"),
@@ -44,11 +46,12 @@ class RegisterController extends Controller
         'role_id' => Role::where('name', 'user')->first()->id,
       ]);
 
-      $hasRole = $user->role->name;
-      unset($user->role);
-      $user->role = $hasRole;
+      $role = Role::find($user->role_id);
+      $user->role = $role->name;
 
       SendActivationEmail::dispatch($user);
+
+      DB::commit();
 
       return response()->json([
         'status' => 'success',
@@ -56,6 +59,7 @@ class RegisterController extends Controller
         'data' => $user,
       ], 201);
     } catch (\Exception $e) {
+      DB::rollBack();
       return response()->json([
         'status' => 'error',
         'message' => 'Failed to register user',

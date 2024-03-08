@@ -23,6 +23,7 @@ return new class extends Migration
         $table->string('bank')->nullable();
         $table->string('va_number')->nullable();
         $table->timestamp('transaction_success_time')->nullable();
+        
         $table->uuid('donation_id');
         $table->foreign('donation_id')->references('id')->on('donations')->onDelete('cascade');
         $table->timestamps();
