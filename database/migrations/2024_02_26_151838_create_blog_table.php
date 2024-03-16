@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignUuid('categories');
             $table->foreignUuid('comments');
             $table->string('title');
-            $table->string('content');
-            $table->string('image');
+            $table->text('content');
+            $table->json('image');
             $table->integer('like')->default(0);
             $table->timestamps();
 

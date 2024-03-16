@@ -13,23 +13,9 @@ class CommentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getComments()
+    public function index()
     {
-        try {
-            $comments = Comment::all();
-      
-            return response()->json([
-              'status' => 'success',
-              'message' => 'Get all comments success',
-              'data' => $comments,
-            ], 200);
-          } catch (\Exception $e) {
-            return response()->json([
-              'status' => 'error',
-              'message' => 'Get all comments failed',
-              'error' => $e->getMessage(),
-            ], 500);
-          }
+      //
     }
 
     /**
@@ -38,35 +24,9 @@ class CommentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function addComment(Request $request)
+    public function store(Request $request)
     {
-        try {
-            $request->validate([
-              'author' => 'string|required',
-              'content' => 'string|required',
-              'like' => 'integer|nullable',
-            ]);
-      
-            $comment = new Comment;
-            
-            $comment->author = $request->input('author');
-            $comment->content = $request->input('content');
-            $comment->like = $request->input('like');
-      
-            $comment->save();
-      
-            return response()->json([
-              'status' => 'success',
-              'message' => 'Comment added successfully',
-              'data' => $comment,
-            ], 201);
-          } catch (\Exception $e) {
-            return response()->json([
-              'status' => 'error',
-              'message' => 'Error adding comment',
-              'error' => $e->getMessage(),
-            ], 500);
-          }
+      //
     }
 
     /**

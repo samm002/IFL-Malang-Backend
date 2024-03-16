@@ -18,6 +18,7 @@ use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\Blog\CommentController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\BlogInventoryController;
+use App\Http\Controllers\Blog\CommentInventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,6 +92,14 @@ Route::prefix('v1')->group(function () {
       Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
       Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
     });
+
+    Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter'], function () {
+      Route::get('/blog', [BlogInventoryController::class, 'getBlogs']);
+      Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
+      Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
+      Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
+      Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
+    });
   });
 
   Route::prefix('user')->group(function () {
@@ -101,8 +110,8 @@ Route::prefix('v1')->group(function () {
   });
 });
 
-Route::get('/comment', [CommentController::class, 'getComments'])->name('get.comments');
-Route::post('/addcomment', [CommentController::class, 'addComment'])->name('add.comment');
+Route::get('/comment', [CommentInventoryController::class, 'getComments'])->name('get.comments');
+Route::post('/addcomment', [CommentInventoryController::class, 'addComment'])->name('add.comment');
 
 Route::get('/categories', [CategoriesController::class, 'getCategories']);
 Route::post('/addcategories', [CategoriesController::class, 'setCategories']);

@@ -17,6 +17,12 @@ class Categories extends Model
       'qty',
     ];
 
+    public function increaseQty()
+    {
+        $this->qty++;
+        $this->save();
+    }
+    
     public function blogs()
     {
         return $this->belongsToMany(Blog::class);

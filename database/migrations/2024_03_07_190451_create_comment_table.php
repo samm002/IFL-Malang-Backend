@@ -15,10 +15,21 @@ return new class extends Migration
     {
         Schema::create('comment', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('author');
+            $table->foreignUuid('author');
+            $table->foreignUuid('blog');
             $table->string('content');
-            $table->integer('like');
+            $table->string('like');
             $table->timestamps();
+
+            $table->foreign('author')
+            ->references('id')
+            ->on('users')
+            ->onDelete('cascade');
+  
+            $table->foreign('blog')
+            ->references('id')
+            ->on('blog')
+            ->onDelete('cascade');
         });
     }
 

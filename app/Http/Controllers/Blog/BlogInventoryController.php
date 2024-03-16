@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Blog;
 
 use App\Models\Blog\Blog;
 use App\Models\Blog\Like;
+use App\Models\Blog\Categories;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class BlogInventoryController extends Controller
 {
@@ -18,7 +21,7 @@ class BlogInventoryController extends Controller
     {
         try {
             $blogs = Blog::all();
-      
+
             return response()->json([
               'status' => 'success',
               'message' => 'Get all blogs success',
@@ -43,13 +46,12 @@ class BlogInventoryController extends Controller
     {
         try {
             $request->validate([
-              'author' => 'string|required', // id author
               'title' => 'string|required',
               'content' => 'string|required',
               'like' => 'integer|nullable',
               'categories' => 'string|required', // id category
               'comments' => 'string|nullable', // id comment
-              'image' => 'string|nullable',
+              'image' => 'image|mimes:jpg,jpeg,png,webp|max:16384',
             ]);
       
             $blog = new Blog;
@@ -63,11 +65,33 @@ class BlogInventoryController extends Controller
             $categories = $request->input('categories');
             $blog->categories = $categories;
             $blog->comments = $request->input('comments');
-            $blog->image = $request->input('image');
+
+            $imagePaths = [];
+            if ($request->hasFile('image')) {
+              foreach ($request->file('image') as $image) {
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path("/img/blog"), $imageName);
+                $imagePaths[] = 'image/' . $imageName;
+            }
+            }
+            // $image = [];
+            // if ($request->hasFile('image')) {
+            //     foreach ($request->file('image') as $image) {
+            //         $path = public_path("/img/user/profile_picture");
+            //         $image[] = $path;
+            //     }
+            // }
+            $blog->image = $imagePaths;
             
             $blog->save();
-            
+          
             $blog->categories()->attach($categories);
+            // Update qty di dalam kategori terkait
+            $categories = explode(',', $request->input('categories'));
+            foreach ($categories as $category) {
+                $category = Categories::firstOrCreate(['id' => $category]);
+                $category->increaseQty(); // Memanggil method increaseQty untuk menambahkan jumlah qty
+            }
       
             return response()->json([
               'status' => 'success',
@@ -98,85 +122,67 @@ class BlogInventoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Blog\Blog  $blog
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function editBlog(Request $request, Blog $blog)
+    public function editBlog(Request $request, $id)
     {
+      $blog = Blog::findOrFail($id);
+
       try {
-        $request->validate([
-          'author' => 'string|required', // id author
-          'title' => 'string|required',
-          'content' => 'string|required',
-          'like' => 'integer|nullable',
-          'categories' => 'string|required', // id category
-          'comments' => 'string|nullable', // id comment
-          'image' => 'string|nullable',
-        ]);
-  
-        if (!$blogs) {
-          return response()->json([
-            'status' => 'error',
-            'message' => 'Blog not found with the given ID',
-            'error' => 'Not Found',
-          ], 404);
-        }
-  
-        $blogs->categories = $request->input('categories');
-        $blogs->title = $request->input('title');
-        $blogs->author = $request->input('author');
-        $blogs->content = $request->input('content');
-        $blogs->like = $request->input('like');
-        $blogs->comments = $request->input('comments');
-        $blogs->image = $request->input('image');
-        $blogs->save();
-  
-        return response()->json([
-          'status' => 'success',
-          'message' => 'Blog updated successfully',
-          'data' => $blogs,
-        ], 200);
-      } catch (\Exception $e) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Error updating blog',
-          'error' => $e->getMessage(),
-        ], 500);
-      }
+      $request->validate([
+        'content' => 'required',
+        'title' => 'required',
+        'categories' => 'required',
+    ]);
+
+      $blog->content = $request->input('content');
+      $blog->title = $request->input('title');
+      $blog->categories = $request->input('categories');
+
+      $blog->save();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Blog added successfully',
+        'data' => $blog,
+      ], 201);
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Error adding blog',
+        'error' => $e->getMessage(),
+      ], 500);
+    }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Blog\Blog  $blog
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Blog $blog)
+    public function destroy($id)
     {
-      try {
-        if (!$blog) {
-          return response()->json([
-            'status' => 'error',
-            'message' => 'Blog not found with the given ID',
-            'error' => 'Not Found',
-          ], 404);
+      $hapus = Blog::where('id', $id)->delete();
+
+        if($hapus) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Sukses menghapus data',
+                'data' => $hapus
+            ]);
         }
-  
-        $blog->delete();
-  
-        return response()->json([
-          'status' => 'success',
-          'message' => 'Blog deleted successfully',
-          'data' => $blog,
-        ], 200);
-      } catch (\Exception $e) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Error deleting blog',
-          'error' => $e->getMessage(),
-        ], 500);
-      }
+
+        else {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Sukses menghapus data',
+                'data' => $hapus
+            ]);
+        }
     }
+
 
     public function searchByAuthor(Request $request)
     {
