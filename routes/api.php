@@ -57,6 +57,8 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
       Route::get('/', [AdminController::class, 'index']);
       Route::apiResource('role', RoleController::class);
+      Route::apiResource('category', CategoryController::class)->except(['index']);
+      Route::apiResource('campaign', CampaignController::class)->except(['index']);
       
       Route::group(['prefix' => 'user'], function () {
         Route::get('/', [UserController::class, 'getAllUser'])->name('get.all.user');
@@ -71,8 +73,8 @@ Route::prefix('v1')->group(function () {
     });
   });
 
-  Route::apiResource('/category', CategoryController::class);
-  Route::apiResource('/campaign', CampaignController::class);
+  Route::get('/campaign', [CampaignController::class, 'index'])->name('get.all.campaign');
+  Route::get('/category', [CategoryController::class, 'index'])->name('get.all.category');
   Route::post('/donation/donate/{campaign_id}', [DonationController::class, 'donate'])->name('donate');
   Route::delete('/donation/deleteAll', [DonationController::class, 'deleteAll']);
   Route::apiResource('/donation', DonationController::class);

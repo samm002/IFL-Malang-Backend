@@ -18,12 +18,31 @@ class CampaignController extends Controller
      */
     public function index()
     {
-      $campaign = Campaign::all();
+      // $campaigns = Campaign::all();
+      // $campaigns->load('categories');
+      // $campaigns = Campaign::with('categories')->get();
+
+      // $campaigns->each(function ($campaign) {
+      //   $campaign->categories->each(function ($category) {
+      //       $category->makeHidden('pivot');
+      //   });
+      // });
+      
+      $campaigns = Campaign::with(['categories' => function ($query) {
+        $query->select('categories.name');
+      }])->get();
+      
+      $campaigns->each(function ($campaign) {
+        $campaign->categories->transform(function ($category) {
+            return $category->name;
+        });
+      });
+
       try {
         return response()->json([
             'status' => 'success',
             'message' => 'Get all campaign success',
-            'data' => $campaign,
+            'data' => $campaigns,
           ], 200);
       } catch (\Exception $e) {
         return response()->json([
@@ -47,9 +66,10 @@ class CampaignController extends Controller
      */
     public function store(Request $request)
     {
+      $user = auth()->user();
+
       $request->validate([
         'title' => ['required', 'string', 'unique:campaigns'],
-        'user_id' => ['required', 'uuid', 'exist:users'],
         'short_description' => ['required', 'string'],
         'body' => ['required', 'string'],
         'view_count' => ['nullable', 'integer', 'min:0'],
@@ -67,6 +87,7 @@ class CampaignController extends Controller
         DB::beginTransaction();
 
         $data = $request->all();
+        $data['user_id'] = $user->id;
         $campaign = new Campaign;
         $campaign->fill($data);
         
@@ -106,6 +127,8 @@ class CampaignController extends Controller
     public function show(string $id)
     {
       $campaign = Campaign::find($id);
+      // $campaigns = Campaign::with('categories')->get();
+
       if (!$campaign) {
         return response()->json([
           'status' => 'error',

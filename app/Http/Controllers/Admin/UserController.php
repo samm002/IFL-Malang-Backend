@@ -13,7 +13,7 @@ class UserController extends Controller
 {
   public function getAllUser()
   {
-    try {
+    try {    
       $users = User::all();
 
       foreach ($users as $user) {

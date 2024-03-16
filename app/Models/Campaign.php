@@ -23,7 +23,13 @@ class Campaign extends Model
       'note',
       'receiver',
       'image',
+      'user_id',
     ];
+
+    public function user()
+    {
+    return $this->belongsTo(User::class);
+    }
 
     public function categories()
     {

@@ -27,6 +27,11 @@ return new class extends Migration
         $table->text('note')->nullable();
         $table->string('receiver');
         $table->string('image')->nullable();
+
+        $table->foreignUuid('user_id')
+            ->constrained('users')
+            ->onDelete('cascade');
+
         $table->timestamps();
       });
     }
