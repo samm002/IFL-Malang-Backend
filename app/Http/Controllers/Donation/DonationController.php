@@ -50,8 +50,6 @@ class DonationController extends Controller
     {
       $user = auth()->user();
 
-      // dd($user->email);
-
       $campaign = Campaign::find($id);
       if (!$campaign) {
         return response()->json([
@@ -60,9 +58,9 @@ class DonationController extends Controller
         ], 404);
       }
 
-      $data = $request->only('email', 'donation_amount', 'donation_message');
+      $data = $request->only('name', 'anonim', 'donation_amount', 'donation_message', 'status', 'user_id', 'campaign_id');
       $data['campaign_id'] = $campaign->id;
-      $data['donation_date'] = Carbon::now();
+      $data['user_id'] = $user->id;
       $data['status'] = 'unpaid';
       
       if($user) {
@@ -70,11 +68,12 @@ class DonationController extends Controller
       }
 
       $validator = Validator::make($data, [
-        'email' => ['required', 'string', 'email', 'max:255'],
+        'name' => ['required', 'string', 'max:255'],
+        'anonim' => ['required', 'numeric'],
         'donation_amount' => ['required', 'numeric'],
         'donation_message' => ['nullable', 'string'],
-        'donation_date' => ['required', 'date'],
-        'status' => ['required'],
+        'status' => ['required', 'string', 'in:unpaid,pending,paid,denied,expired,canceled'],
+        'user_id' => ['nullable', 'uuid'],
         'campaign_id' => ['required', 'uuid'],
       ]);
 

@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Donation;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Campaign;
+use App\Models\Category;
 
 class CampaignController extends Controller
 {
@@ -17,17 +17,7 @@ class CampaignController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-      // $campaigns = Campaign::all();
-      // $campaigns->load('categories');
-      // $campaigns = Campaign::with('categories')->get();
-
-      // $campaigns->each(function ($campaign) {
-      //   $campaign->categories->each(function ($category) {
-      //       $category->makeHidden('pivot');
-      //   });
-      // });
-      
+    {      
       $campaigns = Campaign::with(['categories' => function ($query) {
         $query->select('categories.name');
       }])->get();
@@ -103,7 +93,29 @@ class CampaignController extends Controller
         }
 
         if ($request->has('categories')) {
+          $categoryIds = $request->categories;
+          $uniqueCategoryIds = array_unique($categoryIds);
+          $existingCategories = Category::whereIn('id', $categoryIds)->get();
+
+          if (count($uniqueCategoryIds) !== count($categoryIds)) {
+            return response()->json([
+              'status' => 'error',
+              'message' => 'Duplicate category IDs found in the input',
+            ], 422);
+          }
+
+          if ($existingCategories->count() !== count($categoryIds)) {
+            return response()->json([
+              'status' => 'error',
+              'message' => 'One or more categories not found with the given ID',
+            ], 422);
+          }
+
           $campaign->categories()->attach($request->categories);
+
+          $campaign->categories->transform(function ($category) {
+            return $category->name;
+          });
         }
 
         DB::commit();
@@ -172,7 +184,7 @@ class CampaignController extends Controller
       }
 
       $request->validate([
-        'title' => ['nullable', 'string', 'unique:campaigns,name,' . $campaign->id],
+        'title' => ['nullable', 'string', 'unique:campaigns,id'],
         'short_description' => ['nullable', 'string'],
         'body' => ['nullable', 'string'],
         'view_count' => ['nullable', 'integer', 'min:0'],
@@ -184,10 +196,13 @@ class CampaignController extends Controller
         'note' => ['nullable', 'string'],
         'receiver' => ['nullable', 'string'],
         'image' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:16384'],
-        'categories' => ['nullable', 'exist:categories'],
+        // 'categories' => ['nullable', 'array'], // Ensure it's an array
+        'categories.*' => ['exists:categories,id'],
       ]);
 
       try {
+        DB::beginTransaction();
+
         if ($request->hasFile('image')) {
           $path = public_path("assets/image/campaign");
           if ($campaign->image) {
@@ -214,6 +229,50 @@ class CampaignController extends Controller
           $request->image->move($path, $campaign_image);
         }
 
+        if ($request->has('categories')) {
+          $existingCategoryIds = $campaign->categories()->pluck('categories.id')->toArray();
+          $categoryIds = $request->categories;
+          $uniqueCategoryIds = array_unique($categoryIds);
+          $existingCategories = Category::whereIn('id', $categoryIds)->get();
+
+          if (count($uniqueCategoryIds) !== count($categoryIds)) {
+            return response()->json([
+              'status' => 'error',
+              'message' => 'Duplicate category IDs found in the input',
+            ], 422);
+          }
+
+          if ($existingCategories->count() !== count($categoryIds)) {
+            return response()->json([
+              'status' => 'error',
+              'message' => 'One or more categories not found with the given ID',
+            ], 422);
+          }
+
+          foreach ($request->categories as $index => $categoryId) {
+            $categoryExists = $campaign->categories()->where('categories.id', $categoryId)->exists();
+            if (isset($existingCategoryIds[$index])) {
+                if ($existingCategoryIds[$index] != $categoryId) {
+                    $campaign->categories()->updateExistingPivot($existingCategoryIds[$index], ['category_id' => $categoryId]);
+                } else {
+                  return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot input same categories in same index',
+                  ], 422);
+                }
+            } else {
+              if (!$categoryExists) {
+                $campaign->categories()->attach($categoryId);
+              } else {
+                return response()->json([
+                  'status' => 'error',
+                  'message' => 'Cannot input same categories',
+                ], 422);
+              }
+            }
+          }
+        }
+
         $campaign->update([
           'title' => $request->input('title') ?? $campaign->title,
           'short_description' => $request->input('short_description') ?? $campaign->short_description,
@@ -228,18 +287,18 @@ class CampaignController extends Controller
           'receiver' => $request->input('receiver') ?? $campaign->receiver,
           'image' => $campaign_image ?? $campaign->image,
         ]);
+
+        $campaign->categories->transform(function ($category) {
+          return $category->name;
+        });
+
+        DB::commit();
         
         return response()->json([
           'status' => 'success',
           'message' => 'Update campaign by id success',
           'data' => $campaign,
         ], 201);
-      } catch (ValidationException $e) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Validation error',
-          'error' => $e->errors(),
-        ], 422);
       } catch (\Exception $e) {
         return response()->json([
           'status' => 'error',
@@ -264,6 +323,8 @@ class CampaignController extends Controller
       }
 
       try {
+        DB::beginTransaction();
+
         if ($campaign->image) {
           $path = public_path("assets/image/campaign");
           File::delete($path . '/' . $campaign->image);
@@ -273,6 +334,8 @@ class CampaignController extends Controller
 
         $campaign->delete();
   
+        DB::commit();
+
         return response()->json([
           'status' => 'success',
           'message' => 'Campaign deleted successfully',

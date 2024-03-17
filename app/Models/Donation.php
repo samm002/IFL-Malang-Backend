@@ -13,12 +13,13 @@ class Donation extends Model
     protected $fillable = [
       'name',
       'email',
+      'anonim',
       'donation_amount',
       'donation_message',
-      'donation_date',
+      'donation_time',
       'status',
-      'payment_method',
       'campaign_id'
+      'user_id'
     ];
 
     public function campaign()

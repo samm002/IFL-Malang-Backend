@@ -16,16 +16,21 @@ return new class extends Migration
       Schema::create('donations', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('name')->default('anonim');
-        $table->tinyInteger(1)->default(0);
-        $table->uuid('order_number')->nullable();
         $table->string('email');
+        $table->tinyInteger('anonim')->default(0);
         $table->decimal('donation_amount', 12, 2);
         $table->text('donation_message')->nullable();
-        $table->timestamp('donation_date')->nullable();
         $table->enum('status', ['unpaid', 'pending', 'paid', 'denied', 'expired', 'canceled']);
-        $table->string('payment_method')->nullable();
-        $table->uuid('campaign_id');
-        $table->foreign('campaign_id')->references('id')->on('campaigns')->onDelete('cascade');
+
+        $table->foreignUuid('campaign_id')
+              ->constrained('campaigns')
+              ->onDelete('cascade');
+
+        $table->foreignUuid('user_id')
+              ->constrained('users')
+              ->onDelete('cascade')
+              ->nullable();
+
         $table->timestamps();
       });
     }
