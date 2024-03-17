@@ -58,6 +58,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     'profile_picture',
     "background_picture",
     'email_verified_at',
+
     'role_id',
   ];
 
@@ -83,6 +84,16 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
   public function role()
   {
     return $this->belongsTo(Role::class);
+  }
+
+  public function donations()
+  {
+    return $this->hasMany(Donation::class);
+  }
+
+  public function transactions()
+  {
+    return $this->hasMany(Transaction::class);
   }
 
   public function hasRole($role)

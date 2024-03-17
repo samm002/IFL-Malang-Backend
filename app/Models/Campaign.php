@@ -23,6 +23,7 @@ class Campaign extends Model
       'note',
       'receiver',
       'image',
+      
       'user_id',
     ];
 

@@ -12,15 +12,23 @@ class Transaction extends Model
 
     protected $fillable = [
       'snap_token',
-      'donation_id',
-      'status',
       'payment_method',
+      'payment_provider',
       'bank',
+      'va_number',
       'transaction_success_time',
+
+      'donation_id',
+      'user_id',
     ];
 
     public function donation()
     {
       return $this->belongsTo(Donation::class);
+    }
+
+    public function user()
+    {
+      return $this->belongsTo(User::class);
     }
 }

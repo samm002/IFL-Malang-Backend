@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 
 
@@ -18,22 +19,26 @@ class CampaignFactory extends Factory
      */
     public function definition()
     {
+        $user = User::where('username', 'bismar')->first();
         $currentDonation = $this->faker->randomFloat(2, 0, 100000);
         $targetDonation = $this->faker->randomFloat(2, $currentDonation + 1, 100000);
-        // $startDate = $this->faker->date();
-        // $startDate = $this->faker->dateTimeBetween('now', '+1 year')->format('Y-m-d')
         $startDate = now()->format('Y-m-d');
         $endDate = $this->faker->dateTimeBetween($startDate, '+1 year')->format('Y-m-d');
-        
+        $shortDescription = implode(' ', $this->faker->words(rand(3, 5)));
+
         return [
-          'name' => $this->faker->unique()->sentence(4),
-          'type' => $this->faker->randomElement(['kemanusiaan', 'kesehatan', 'pendidikan', 'tanggap bencana']),
+          'title' => $this->faker->unique()->sentence(4),
+          'short_description' => $shortDescription,
+          'body' => $this->faker->paragraph,
+          'status' => $this->faker->randomElement(['active', 'closed', 'pending']),
           'current_donation' => $currentDonation,
           'target_donation' => $targetDonation,
-          'start_date' => $startDate,
+          'publish_date' => $startDate,
           'end_date' => $endDate,
-          'description' => $this->faker->paragraph,
-          'photo' => $this->faker->imageUrl(),
+          'note' => $this->faker->optional()->sentence,
+          'receiver' => $this->faker->name,
+          'image' => $this->faker->imageUrl(),
+          'user_id' => $user->id ?? null,
         ];
     }
 }

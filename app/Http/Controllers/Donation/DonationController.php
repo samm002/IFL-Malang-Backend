@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Donation;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Campaign;
 use App\Models\Donation;
@@ -58,17 +59,21 @@ class DonationController extends Controller
         ], 404);
       }
 
-      $data = $request->only('name', 'anonim', 'donation_amount', 'donation_message', 'status', 'user_id', 'campaign_id');
+      $data = $request->only('name', 'email', 'anonim', 'donation_amount', 'donation_message', 'status', 'user_id', 'campaign_id');
       $data['campaign_id'] = $campaign->id;
-      $data['user_id'] = $user->id;
       $data['status'] = 'unpaid';
+      $data['user_id'] = $user->id ?? null;
       
       if($user) {
         $data['email'] = $user->email;
       }
 
+      if($request->input('anonim') == 1) {
+        $data['name'] = 'anonim';
+      }
+
       $validator = Validator::make($data, [
-        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255'],
         'anonim' => ['required', 'numeric'],
         'donation_amount' => ['required', 'numeric'],
         'donation_message' => ['nullable', 'string'],
@@ -84,11 +89,13 @@ class DonationController extends Controller
       }
 
       try {
+        DB::beginTransaction();
         $donation = Donation::create($data);
+
 
         $transaction = Transaction::create([
           'donation_id' => $donation->id,
-          'user_id' => $user->id ?? null,
+          'user_id' => $donation->user_id,
         ]);
 
         Config::$serverKey = config('midtrans.server_key');
@@ -106,13 +113,12 @@ class DonationController extends Controller
             'id' => $campaign->id,
             'price' => $donation->donation_amount,
             'quantity' => 1,
-            'name' => $campaign->name,
-            'category'=> $campaign->type,
+            'name' => $campaign->title,
           )
         );
 
         $customer_details = array(
-          'first_name' => $donation->name ?? 'anonim',
+          'first_name' => $donation->name  ?? 'anonim',
           'email' => $donation->email,
         );
 
@@ -121,10 +127,14 @@ class DonationController extends Controller
           'item_details' => $campaign_details,
           'customer_details' => $customer_details,
         );
-
+        
         $snapToken = Snap::getSnapToken($transaction_data);
         $paymentUrl = Snap::createTransaction($transaction_data)->redirect_url;
 
+        $transaction->update(['snap_token' => $snapToken]);
+
+        DB::commit();
+        
         return response()->json([
           'status' => 'success',
           'message' => 'succesfully create donation',

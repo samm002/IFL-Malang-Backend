@@ -20,8 +20,8 @@ class DatabaseSeeder extends Seeder
       UserSeeder::class,
       CopyWriterSeeder::class,
       BisMarSeeder::class,
-      // CampaignSeeder::class,
-      CategorySeeder::class,
+      CampaignSeeder::class,
+      // CategorySeeder::class,
     ]);
   }
 }

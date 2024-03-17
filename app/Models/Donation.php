@@ -16,12 +16,17 @@ class Donation extends Model
       'anonim',
       'donation_amount',
       'donation_message',
-      'donation_time',
       'status',
-      'campaign_id'
+      
+      'campaign_id',
       'user_id'
     ];
 
+    public function user()
+    {
+      return $this->belongsTo(User::class);
+    }
+    
     public function campaign()
     {
       return $this->belongsTo(Campaign::class);

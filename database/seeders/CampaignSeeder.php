@@ -16,52 +16,10 @@ class CampaignSeeder extends Seeder
      */
     public function run()
     {
-      $kemanusiaan = Category::factory()->create([
-        'name' => 'kemanusiaan',
-        'description' => 'This is kemanusiaan category'
-      ]);
-      
-      $kesehatan = Category::factory()->create([
-        'name' => 'kesehatan',
-        'description' => 'This is kesehatan category'
-      ]);
-      
-      $pendidikan = Category::factory()->create([
-        'name' => 'pendidikan',
-        'description' => 'This is pendidikan category'
-      ]);
-      
-      $tanggapBencana = Category::factory()->create([
-        'name' => 'tanggap bencana',
-        'description' => 'This is tanggap bencana category'
-      ]);
+      $this->call(CategorySeeder::class);
 
-      Campaign::factory()->create([
-        'name' => 'Galang Dana Kemanusiaan',
-        'type' => 'kemanusiaan',
-        'description' => 'Ini adalah campaign kemanusiaan',
-        'photo' => 'kemanusiaan_default.jpeg'
-      ])->categories()->attach($kemanusiaan);
-
-      Campaign::factory()->create([
-        'name' => 'Galang Dana Kesehatan',
-        'type' => 'kesehatan',
-        'description' => 'Ini adalah campaign kesehatan',
-        'photo' => 'kesehatan_default.jpg'
-      ])->categories()->attach($kesehatan);
-
-      Campaign::factory()->create([
-        'name' => 'Galang Dana Pendidikan',
-        'type' => 'pendidikan',
-        'description' => 'Ini adalah campaign pendidikan',
-        'photo' => 'pendidikan_default.jpeg'
-      ])->categories()->attach($pendidikan);
-
-      Campaign::factory()->create([
-        'name' => 'Galang Dana Tanggap Bencana',
-        'type' => 'tanggap bencana',
-        'description' => 'Ini adalah campaign tanggap bencana',
-        'photo' => 'tanggap-bencana_default.jpg'
-      ])->categories()->attach($tanggapBencana);
+      Campaign::factory(2)->create()->each(function ($campaign) {
+        $campaign->categories()->attach(Category::inRandomOrder()->limit(rand(1, 3))->pluck('id')->toArray());
+      });
     }
 }

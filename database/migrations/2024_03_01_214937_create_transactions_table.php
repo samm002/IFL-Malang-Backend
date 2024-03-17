@@ -16,16 +16,21 @@ return new class extends Migration
       Schema::create('transactions', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('snap_token')->nullable();
-        $table->string('midtrans_transaction_id')->nullable();
-        $table->enum('status', ['unpaid', 'pending', 'paid', 'denied', 'expired', 'canceled'])->nullable();
         $table->string('payment_method')->nullable();
         $table->string('payment_provider')->nullable();
         $table->string('bank')->nullable();
         $table->string('va_number')->nullable();
         $table->timestamp('transaction_success_time')->nullable();
         
-        $table->uuid('donation_id');
-        $table->foreign('donation_id')->references('id')->on('donations')->onDelete('cascade');
+        $table->foreignUuid('donation_id')
+              ->constrained('donations')
+              ->onDelete('cascade');
+        
+        $table->foreignUuid('user_id')
+              ->nullable()
+              ->constrained('users')
+              ->onDelete('cascade');
+        
         $table->timestamps();
       });
     }
