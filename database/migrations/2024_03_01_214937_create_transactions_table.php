@@ -18,7 +18,6 @@ return new class extends Migration
         $table->string('snap_token')->nullable();
         $table->string('payment_method')->nullable();
         $table->string('payment_provider')->nullable();
-        $table->string('bank')->nullable();
         $table->string('va_number')->nullable();
         $table->timestamp('transaction_success_time')->nullable();
         

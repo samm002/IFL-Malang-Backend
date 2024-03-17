@@ -249,19 +249,20 @@ class UserController extends Controller
         $request->background_picture->move($path, $backgroundPicture);
       }
 
-      $inputRole = $request->input('role');
+      $inputRole = $request->input('role_id');
 
       if($inputRole) {
-        $role = Role::where('name', $inputRole)->first();
+        $role = Role::where('id', $inputRole)->first();
 
         if (!$role) {
           return response()->json([
             'status' => 'error',
-            'message' => (string) $inputRole . 'not found',
+            'message' => 'role with id ' . (string) $inputRole . ' not found',
           ], 404);
         }
       }
 
+      
       $user->update([
         'name' => $request->input('name') ?? $user->name,
         'username' => $request->input('username') ?? $user->username,
@@ -272,7 +273,7 @@ class UserController extends Controller
         'about_me' => $request->input('about_me') ?? $user->about_me,
         'profile_picture' => $profilePicture ?? $user->profile_picture,
         'background_picture' => $backgroundPicture ?? $user->background_picture,
-        'role_id' => $role ?? $user->role_id,
+        'role_id' => $inputRole ?? $user->role_id,
       ]);
 
       $role = Role::find($user->role_id);
