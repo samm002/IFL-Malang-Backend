@@ -74,7 +74,7 @@ class DonationController extends Controller
 
       $validator = Validator::make($data, [
         'email' => ['required', 'string', 'email', 'max:255'],
-        'anonim' => ['required', 'numeric'],
+        'anonim' => ['nullable', 'numeric'],
         'donation_amount' => ['required', 'numeric'],
         'donation_message' => ['nullable', 'string'],
         'status' => ['required', 'string', 'in:unpaid,pending,paid,denied,expired,canceled'],

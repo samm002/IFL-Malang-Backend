@@ -79,4 +79,5 @@ Route::prefix('v1')->group(function () {
   Route::delete('/donation/deleteAll', [DonationController::class, 'deleteAll']);
   Route::apiResource('/donation', DonationController::class);
   Route::post('/payment-callback', [TransactionController::class, 'paymentCallback'])->name('paymentCallback');
+  Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice');
 });
