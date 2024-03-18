@@ -77,11 +77,11 @@ class BlogInventoryController extends Controller
             // $image = [];
             // if ($request->hasFile('image')) {
             //     foreach ($request->file('image') as $image) {
-            //         $path = public_path("/img/user/profile_picture");
+            //         $path = public_path("/img/blog");
             //         $image[] = $path;
             //     }
             // }
-            $blog->image = $imagePaths;
+            $blog->image = json_encode($imagePaths);
             
             $blog->save();
           

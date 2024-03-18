@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('author');
             $table->foreignUuid('categories');
-            $table->foreignUuid('comments');
+            $table->foreignUuid('comments')->nullable();
             $table->string('title');
             $table->text('content');
             $table->json('image');

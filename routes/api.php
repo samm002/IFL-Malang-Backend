@@ -99,6 +99,9 @@ Route::prefix('v1')->group(function () {
       Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
       Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
       Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
+      Route::get('/categories', [CategoriesController::class, 'getCategories']);
+      Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
+
     });
   });
 
@@ -112,9 +115,6 @@ Route::prefix('v1')->group(function () {
 
 Route::get('/comment', [CommentInventoryController::class, 'getComments'])->name('get.comments');
 Route::post('/addcomment', [CommentInventoryController::class, 'addComment'])->name('add.comment');
-
-Route::get('/categories', [CategoriesController::class, 'getCategories']);
-Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
 
 Route::get('/blog/search-by-author/{author}', [BlogInventoryController::class, 'searchByAuthor']);
 Route::get('/blog/search-by-categorie/{categories}', [BlogInventoryController::class, 'searchByCategorie']);

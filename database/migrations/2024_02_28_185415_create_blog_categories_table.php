@@ -14,10 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('blog_categories', function (Blueprint $table) {
-          // $table->uuid('id')->primary();
-          $table->id();
-          $table->uuid('blog_id')->unique();
-          $table->uuid('categories_id');
+          $table->uuid('id')->primary();
+          $table->foreignUuid('blog_id')->unique();
+          $table->foreignUuid('categories_id');
           $table->timestamps();
   
           $table->foreign('blog_id')

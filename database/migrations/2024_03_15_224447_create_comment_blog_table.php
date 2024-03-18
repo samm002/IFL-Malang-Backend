@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('blog_comment', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('blog_id')->unique();
-            $table->uuid('comment_id');
+        Schema::create('comment_blog', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('blog_id')->unique();
+            $table->foreignUuid('comment_id');
             $table->timestamps();
     
             $table->foreign('blog_id')

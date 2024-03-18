@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('comment', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('author');
-            $table->foreignUuid('blog');
+            // $table->foreignUuid('blog');
             $table->string('content');
             $table->string('like');
             $table->timestamps();
@@ -25,11 +25,11 @@ return new class extends Migration
             ->references('id')
             ->on('users')
             ->onDelete('cascade');
-  
-            $table->foreign('blog')
-            ->references('id')
-            ->on('blog')
-            ->onDelete('cascade');
+
+            // $table->foreign('blog')
+            // ->references('id')
+            // ->on('blog')
+            // ->onDelete('cascade');
         });
     }
 
