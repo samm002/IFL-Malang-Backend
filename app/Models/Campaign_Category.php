@@ -11,6 +11,8 @@ class Campaign_Category extends Pivot
 {
     use HasFactory, HasUuids;
 
+    protected $table = 'campaign_category';
+
     protected $fillable = [
       'campaign_id',
       'category_id',

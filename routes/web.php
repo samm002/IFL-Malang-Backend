@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Donation\DonationViewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,7 @@ Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'ver
 Route::get('google', function () {
   return view('googleAuth');
 });
+
+Route::get('/donate', [DonationViewController::class, 'donationForm'])->name('donation.form');
+Route::post('/donate/{campaign_id}', [DonationViewController::class, 'donate'])->name('donation.donate');
+Route::get('/invoice/{transaction_id}', [DonationViewController::class, 'donate'])->name('donation.donate');

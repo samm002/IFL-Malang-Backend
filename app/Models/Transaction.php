@@ -12,11 +12,12 @@ class Transaction extends Model
 
     protected $fillable = [
       'snap_token',
+      'midtrans_transaction_id',
       'payment_method',
       'payment_provider',
-      'bank',
       'va_number',
       'transaction_success_time',
+      'transaction_expiry_time',
 
       'donation_id',
       'user_id',

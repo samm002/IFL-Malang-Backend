@@ -10,8 +10,10 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
+use App\Http\Controllers\Donation\Campaign_CategoryController;
 use App\Http\Controllers\Donation\CampaignController;
 use App\Http\Controllers\Donation\CategoryController;
+use App\Http\Controllers\Donation\DonationViewController;
 use App\Http\Controllers\Donation\DonationController;
 use App\Http\Controllers\Donation\TransactionController;
 use App\Http\Controllers\NoticeController;
@@ -57,6 +59,7 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
       Route::get('/', [AdminController::class, 'index']);
       Route::apiResource('role', RoleController::class);
+      Route::apiResource('campaign_category', Campaign_CategoryController::class);
       Route::apiResource('category', CategoryController::class)->except(['index']);
       Route::apiResource('campaign', CampaignController::class)->except(['index']);
       
@@ -80,4 +83,6 @@ Route::prefix('v1')->group(function () {
   Route::apiResource('/donation', DonationController::class);
   Route::post('/payment-callback', [TransactionController::class, 'paymentCallback'])->name('paymentCallback');
   Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+  Route::get('/invoiceView/{transaction_id}', [DonationViewController::class, 'invoice'])->name('invoiceView');
+  Route::get('/transactions', [TransactionController::class, 'index'])->name('get.all.transaction');
 });

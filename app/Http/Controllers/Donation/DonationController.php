@@ -59,7 +59,7 @@ class DonationController extends Controller
         ], 404);
       }
 
-      $data = $request->only('name', 'email', 'anonim', 'donation_amount', 'donation_message', 'status', 'user_id', 'campaign_id');
+      $data = $request->only('name', 'email', 'donation_amount', 'donation_message', 'status', 'user_id', 'campaign_id');
       $data['campaign_id'] = $campaign->id;
       $data['status'] = 'unpaid';
       $data['user_id'] = $user->id ?? null;
@@ -134,13 +134,15 @@ class DonationController extends Controller
         $transaction->update(['snap_token' => $snapToken]);
 
         DB::commit();
-        
+
         return response()->json([
           'status' => 'success',
           'message' => 'succesfully create donation',
-          'snap_token' => $snapToken,
+          'snapToken' => $snapToken,
           'payment_url' => $paymentUrl,
         ], 201);
+
+      // return view('donate', compact('snapToken'));
       } catch (\Exception $e) {
         return response()->json([
           'status' => 'error',

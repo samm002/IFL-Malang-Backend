@@ -16,10 +16,12 @@ return new class extends Migration
       Schema::create('transactions', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('snap_token')->nullable();
+        $table->string('midtrans_transaction_id')->nullable();
         $table->string('payment_method')->nullable();
         $table->string('payment_provider')->nullable();
         $table->string('va_number')->nullable();
         $table->timestamp('transaction_success_time')->nullable();
+        $table->timestamp('transaction_expiry_time')->nullable();
         
         $table->foreignUuid('donation_id')
               ->constrained('donations')
