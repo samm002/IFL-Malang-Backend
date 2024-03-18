@@ -10,7 +10,6 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
-use App\Http\Controllers\Donation\Campaign_CategoryController;
 use App\Http\Controllers\Donation\CampaignController;
 use App\Http\Controllers\Donation\CategoryController;
 use App\Http\Controllers\Donation\DonationViewController;
@@ -59,7 +58,6 @@ Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
       Route::get('/', [AdminController::class, 'index']);
       Route::apiResource('role', RoleController::class);
-      Route::apiResource('campaign_category', Campaign_CategoryController::class);
       Route::apiResource('category', CategoryController::class)->except(['index']);
       Route::apiResource('campaign', CampaignController::class)->except(['index']);
       
