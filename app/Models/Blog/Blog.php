@@ -19,7 +19,7 @@ class Blog extends Model
         'categories', 
         'title', 
         'content', 
-        'image', 
+        'image' => 'json', 
         'like', 
         'comments',
     ];

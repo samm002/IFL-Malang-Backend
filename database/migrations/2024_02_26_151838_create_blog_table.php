@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignUuid('comments')->nullable();
             $table->string('title');
             $table->text('content');
-            $table->json('image');
+            $table->json('image')->nullable();
             $table->integer('like')->default(0);
             $table->timestamps();
 

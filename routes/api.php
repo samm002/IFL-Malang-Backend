@@ -98,9 +98,9 @@ Route::prefix('v1')->group(function () {
       Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
       Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
       Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
-      Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
       Route::get('/categories', [CategoriesController::class, 'getCategories']);
       Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
+      Route::post('/blog/like/{id}', [BlogController::class, 'likeBlog']);
 
     });
   });
