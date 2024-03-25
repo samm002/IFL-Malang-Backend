@@ -44,6 +44,7 @@ use App\Http\Controllers\Blog\CommentInventoryController;
 
 // Routh untuk Auth
 Route::prefix('v1')->group(function () {
+  Route::get('blog', [BlogInventoryController::class, 'getBlogs']);
   Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register');
     Route::post('login', [LoginController::class, 'login'])->name('login');
@@ -85,23 +86,30 @@ Route::prefix('v1')->group(function () {
       Route::get('role_user/role_id/{role}', [Role_UserController::class, 'showByRoleId']);
     });
 
-    Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter'], function () {
-      Route::get('/blog', [BlogInventoryController::class, 'getBlogs']);
-      Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
-      Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
-      Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
-      Route::post('/blogs/like/{blog}', [BlogController::class, 'likeBlog']);
-    });
+    Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter, admin'], function () {
+      //blog
+      Route::get('blog', [BlogInventoryController::class, 'getBlogs']);
+      Route::post('addblog', [BlogInventoryController::class, 'addBlog']);
+      Route::put('editblog/{id}', [BlogInventoryController::class, 'editBlog']);
+      Route::delete('deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
+      Route::post('blog/like/{id}', [BlogController::class, 'likeBlog']);
+      Route::post('blog/dislike/{id}', [BlogController::class, 'dislikeBlog']);
+      Route::get('blog/search-by-author/{author}', [BlogInventoryController::class, 'searchByAuthor']);
+      Route::get('blog/search-by-category/{categories}', [BlogInventoryController::class, 'searchByCategory']);
 
-    Route::group(['prefix' => 'copywriter', 'middleware' => 'role:copywriter'], function () {
-      Route::get('/blog', [BlogInventoryController::class, 'getBlogs']);
-      Route::post('/addblog', [BlogInventoryController::class, 'addBlog']);
-      Route::put('/editblog/{id}', [BlogInventoryController::class, 'editBlog']);
-      Route::delete('/deleteblog/{id}', [BlogInventoryController::class, 'destroy']);
-      Route::get('/categories', [CategoriesController::class, 'getCategories']);
-      Route::post('/addcategories', [CategoriesController::class, 'setCategories']);
-      Route::post('/blog/like/{id}', [BlogController::class, 'likeBlog']);
-
+      //category
+      Route::get('categories', [CategoriesController::class, 'getCategories']);
+      Route::post('addcategory', [CategoriesController::class, 'setCategories']);
+      Route::put('editcategory/{id}', [CategoriesController::class, 'editCategory']);
+      Route::delete('deletecategory/{id}', [CategoriesController::class, 'deleteCategory']);
+      
+      //comment
+      Route::get('comment', [CommentInventoryController::class, 'getComments']);
+      Route::post('addcomment', [CommentInventoryController::class, 'addComment']);
+      Route::put('editcomment/{id}', [CommentInventoryController::class, 'editComment']);
+      Route::delete('deletecomment/{id}', [CommentInventoryController::class, 'deleteComment']);
+      Route::post('comment/like/{id}', [CommentController::class, 'likeComment']);
+      Route::post('comment/dislike/{id}', [CommentController::class, 'dislikeComment']);
     });
   });
 
@@ -110,11 +118,12 @@ Route::prefix('v1')->group(function () {
     Route::get('/verified', [UserController::class, 'getAllVerifiedUser'])->name('get.all.verified.user');
     Route::get('/unverified', [UserController::class, 'getAllNotVerifiedUser'])->name('get.all.not.verified.user');
     Route::get('/{email}', [UserController::class, 'getUserByEmail'])->name('get.user.by.email');
+    Route::get('blog', [BlogInventoryController::class, 'getBlogs']);
+    Route::post('blog/like/{id}', [BlogController::class, 'likeBlog']);
+    Route::post('blog/dislike/{id}', [BlogController::class, 'dislikeBlog']);
+    Route::get('comment', [CommentInventoryController::class, 'getComments']);
+    Route::post('addcomment', [CommentInventoryController::class, 'addComment']);
+    Route::post('comment/like/{id}', [CommentController::class, 'likeComment']);
+    Route::post('comment/dislike/{id}', [CommentController::class, 'dislikeComment']);
   });
 });
-
-Route::get('/comment', [CommentInventoryController::class, 'getComments'])->name('get.comments');
-Route::post('/addcomment', [CommentInventoryController::class, 'addComment'])->name('add.comment');
-
-Route::get('/blog/search-by-author/{author}', [BlogInventoryController::class, 'searchByAuthor']);
-Route::get('/blog/search-by-categorie/{categories}', [BlogInventoryController::class, 'searchByCategorie']);

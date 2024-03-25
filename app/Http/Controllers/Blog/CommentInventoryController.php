@@ -90,9 +90,30 @@ class CommentInventoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function editComment(Request $request, $id)
     {
-        //
+      $comment = Comment::findOrFail($id);
+
+      try {
+        $request->validate([
+          'content' => 'required',
+      ]);
+
+        $comment->content = $request->input('content');
+        $comment->save();
+
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Comment updated successfully',
+          'data' => $comment,
+        ], 201);
+      } catch (\Exception $e) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Error updating comment',
+          'error' => $e->getMessage(),
+        ], 500);
+      }
     }
 
     /**
@@ -101,8 +122,24 @@ class CommentInventoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function deleteComment($id)
     {
-        //
+      $delete = Comment::where('id', $id)->delete();
+
+      if($delete) {
+          return response()->json([
+              'status' => 0,
+              'message' => 'Comment deleted successfully',
+              'data' => $delete
+          ]);
+      }
+
+      else {
+          return response()->json([
+              'status' => 1,
+              'message' => 'Error deleting Comment',
+              'data' => $delete
+          ]);
+      }
     }
 }

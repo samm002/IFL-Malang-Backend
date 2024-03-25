@@ -56,13 +56,13 @@ class CategoriesController extends Controller
       
             return response()->json([
               'status' => 'success',
-              'message' => 'Categorie added successfully',
+              'message' => 'Category added successfully',
               'data' => $categories,
             ], 201);
           } catch (\Exception $e) {
             return response()->json([
               'status' => 'error',
-              'message' => 'Error adding categorie',
+              'message' => 'Error adding category',
               'error' => $e->getMessage(),
             ], 500);
           }  
@@ -86,9 +86,30 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function editCategory(Request $request, $id)
     {
-        //
+      $categories = Categories::findOrFail($id);
+
+      try {
+        $request->validate([
+          'categories' => 'required',
+      ]);
+
+        $categories->categories = $request->input('categories');
+        $categories->save();
+
+        return response()->json([
+          'status' => 'success',
+          'message' => 'Category updated successfully',
+          'data' => $categories,
+        ], 201);
+      } catch (\Exception $e) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Error updating category',
+          'error' => $e->getMessage(),
+        ], 500);
+      }
     }
 
     /**
@@ -97,8 +118,24 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function deleteCategory($id)
     {
-        //
+      $delete = Categories::where('id', $id)->delete();
+
+      if($delete) {
+          return response()->json([
+              'status' => 0,
+              'message' => 'Category deleted successfully',
+              'data' => $delete
+          ]);
+      }
+
+      else {
+          return response()->json([
+              'status' => 1,
+              'message' => 'Error deleting category',
+              'data' => $delete
+          ]);
+      }
     }
 }

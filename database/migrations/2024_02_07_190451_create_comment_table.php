@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignUuid('author');
             // $table->foreignUuid('blog');
             $table->string('content');
-            $table->string('like');
+            $table->int('like')->nullable;
             $table->timestamps();
 
             $table->foreign('author')

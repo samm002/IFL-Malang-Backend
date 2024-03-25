@@ -45,66 +45,48 @@ class BlogInventoryController extends Controller
      */
     public function addBlog(Request $request)
     {
-      $user = auth()->user();
-        $request->validate([
-          'title' => 'string|required',
-          'content' => 'string|required',
-          'like' => 'integer|nullable',
-          'categories' => 'string|required', // id category
-          'comments' => 'string|nullable', // id comment
-          'image' => 'image|mimes:jpg,jpeg,png,webp|max:16384',
-        ]);
-      try { // ini syntax biar gaada data error yang kecreate, pakai ini untuk create/update many to many. coba search laravel transaction ntar
+        try {
+            $request->validate([
+              'title' => 'string|required',
+              'content' => 'string|required',
+              'like' => 'integer|nullable',
+              'categories' => 'string|required', // id category
+              'comments' => 'string|nullable', // id comment
+              'image' => 'image|mimes:jpg,jpeg,png,webp|max:16384',
+            ]);
 
-        $data = $request->all();
-        $data['author'] = $user->id;
-        $blog = new Blog;
-        $blog->fill($data);
+            $blog = new Blog;
+            
+            $userId = auth()->user()->id;
 
-        $blog->save();
+            $blog->author = $userId;
+            $blog->title = $request->input('title');
+            $blog->content = $request->input('content');
+            $blog->like = $request->input('like');
+            $categories = $request->input('categories');
+            $blog->categories = $categories;
+            $blog->comments = $request->input('comments');
 
-            $imagePaths = [];
-            if ($request->hasFile('image')) {
-              foreach ($request->file('image') as $image) {
-                $imageName = time() . '_' . $image->getClientOriginalName();
+            if($request->hasfile('image')) 
+            {
+              $image = $request->file('image');
+
+              foreach ($image as $image) 
+              {
+                $imageName = $image->getClientOriginalName();
                 $image->move(public_path("/img/blog"), $imageName);
-                $imagePaths[] = '/image/blog/' . $imageName;
             }
-            }
-            // $image = [];
-            // if ($request->hasFile('image')) {
-            //     foreach ($request->file('image') as $image) {
-            //         $path = public_path("/img/blog");
-            //         $image[] = $path;
-            //     }
-            // }
-            $blog->image = json_encode($imagePaths);
+          }
+
+            $blog->image = json_encode($image);
             $blog->save();
           
-            if ($request->has('categories')) {
-              $categoryIds = $request->categories;
-              $uniqueCategoryIds = array_unique($categoryIds);
-              $existingCategories = Categories::whereIn('id', $categoryIds)->get();
-    
-              if (count($uniqueCategoryIds) !== count($categoryIds)) {
-                return response()->json([
-                  'status' => 'error',
-                  'message' => 'Duplicate category IDs found in the input',
-                ], 422);
-              }
-    
-              if ($existingCategories->count() !== count($categoryIds)) {
-                return response()->json([
-                  'status' => 'error',
-                  'message' => 'One or more categories not found with the given ID',
-                ], 422);
-              }
-    
-              $blog->categories()->attach($request->categories);
-    
-              $blog->categories->transform(function ($category) {
-                return $category->categories;
-              });
+            $blog->categories()->attach($categories);
+            // Update qty di dalam kategori terkait
+            $categories = explode(',', $request->input('categories'));
+            foreach ($categories as $category) {
+                $category = Categories::firstOrCreate(['id' => $category]);
+                $category->increaseQty(); // Memanggil method increaseQty untuk menambahkan jumlah qty
             }
       
             return response()->json([
@@ -119,6 +101,7 @@ class BlogInventoryController extends Controller
               'error' => $e->getMessage(),
             ], 500);
           }
+    
     }
 
     /**
@@ -214,7 +197,7 @@ class BlogInventoryController extends Controller
         return response()->json(['data' => $blogs]);
     }
 
-    public function searchByCategorie(Request $request)
+    public function searchByCategory(Request $request)
     {
         $categoriesId = $request->input('categories');
 

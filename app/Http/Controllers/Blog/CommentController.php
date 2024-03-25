@@ -63,16 +63,22 @@ class CommentController extends Controller
         //
     }
 
-    public function like(Post $post)
+    public function likeComment(Request $request, $commentId)
     {
-        $post->like();
-        return response()->json(['message' => 'Post liked']);
+        $comment = Comment::findOrFail($commentId);
+        $comment->increment('like');
+        $comment->save();
+
+        return response()->json(['message' => 'Comment liked successfully'], 200);
     }
 
-    public function unlike(Post $post)
+    public function dislikeComment(Request $request, $commentId)
     {
-        $post->unlike();
-        return response()->json(['message' => 'Post unliked']);
+        $comment = Comment::findOrFail($commentId);
+        $comment->decrement('like');
+        $comment->save();
+
+        return response()->json(['message' => 'Comment disliked successfully'], 200);
     }
 
 }

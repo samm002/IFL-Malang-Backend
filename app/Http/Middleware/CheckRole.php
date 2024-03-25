@@ -16,13 +16,15 @@ class CheckRole
    * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
    * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
    */
-  public function handle(Request $request, Closure $next, $role, $redirectToRoute = null)
+  public function handle(Request $request, Closure $next, ...$roles)
   {
-    if (!$request->user()->hasRole($role)) {
-      // abort(401, 'This action is unauthorized.');
-      // return redirect('/welcome')->with('error', 'You are not authorized to access this page.');
-      return Redirect::guest(URL::route($redirectToRoute ?: 'notAdmin.notice'));
+    foreach ($roles as $role) {
+      if ($request->user()->hasRole($role)) {
+        // abort(401, 'This action is unauthorized.');
+        // return redirect('/welcome')->with('error', 'You are not authorized to access this page.');
+        return $next($request);
+      }
     }
-    return $next($request);
+    return Redirect::guest(URL::route('notAdmin.notice'));
   }
 }
